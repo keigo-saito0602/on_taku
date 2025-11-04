@@ -1,0 +1,48 @@
+<div class="flex items-end justify-between gap-4">
+  <div>
+    <h1 class="text-2xl font-semibold text-slate-900">出演アーティスト</h1>
+    <p class="mt-1 text-sm text-slate-500">公開状態やジャンルを含めた一覧です。</p>
+  </div>
+  <% if current_user&.organizer? %>
+    <%= link_to "アーティストを追加", new_artist_path, class: "inline-flex items-center rounded-lg bg-sky-600 px-4 py-2 text-sm font-semibold text-white shadow transition hover:bg-sky-500" %>
+  <% end %>
+</div>
+
+<div class="mt-6 overflow-hidden rounded-xl border border-slate-200 bg-white shadow">
+  <table class="min-w-full divide-y divide-slate-200 text-sm">
+    <thead class="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">
+      <tr>
+        <th class="px-4 py-3">名称</th>
+        <th class="px-4 py-3">ジャンル</th>
+        <th class="px-4 py-3">区分</th>
+        <th class="px-4 py-3">公開状態</th>
+        <th class="px-4 py-3 text-right">操作</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-slate-100">
+      <% @artists.each do |artist| %>
+        <tr class="hover:bg-slate-50">
+          <td class="px-4 py-3 font-medium text-slate-800">
+            <%= link_to artist.name, artist, class: "text-sky-600 hover:text-sky-500" %>
+          </td>
+          <td class="px-4 py-3 text-slate-600"><%= artist.genre.presence || "-" %></td>
+          <td class="px-4 py-3 text-slate-600"><%= Artist.human_enum_name(:kind, artist.kind) %></td>
+          <td class="px-4 py-3">
+            <% badge = artist.published? ? "bg-emerald-100 text-emerald-700" : "bg-slate-200 text-slate-600" %>
+            <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold <%= badge %>"><%= artist.published? ? "公開" : "非公開" %></span>
+          </td>
+          <td class="px-4 py-3 text-right text-xs font-semibold text-slate-500">
+            <% if current_user&.organizer? %>
+              <div class="flex justify-end gap-3">
+                <%= link_to "編集", edit_artist_path(artist), class: "text-sky-600 hover:text-sky-500" %>
+                <%= link_to "削除", artist, data: { turbo_confirm: "削除しますか？" }, method: :delete, class: "text-rose-600 hover:text-rose-500" %>
+              </div>
+            <% else %>
+              <span class="text-slate-300">-</span>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

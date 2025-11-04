@@ -1,0 +1,52 @@
+<% slot = f.object %>
+<% slot_type = slot.changeover? ? "changeover" : (slot.artist.present? ? "performance" : "other") %>
+<% color_classes = case slot_type
+  when "changeover" then "bg-amber-50 border-amber-200"
+  when "other" then "bg-slate-100 border-slate-200"
+  else "bg-emerald-50 border-emerald-200"
+end %>
+
+<% slot_classes = ["rounded-xl border p-4 shadow-sm transition", color_classes] %>
+<% slot_classes << "slot-hidden" if slot.marked_for_destruction? %>
+<div class="<%= slot_classes.join(" ") %>" data-timetable-editor-target="slot" data-slot-id="<%= slot.id || '' %>" data-slot-type="<%= slot_type %>" data-original-type="<%= slot_type %>">
+  <div class="flex items-center justify-between gap-3 border-b border-slate-100 pb-3">
+    <div class="flex items-center gap-2 text-sm font-semibold text-slate-700">
+      <span class="drag-handle cursor-move text-slate-400" data-action="timetable-editor#handleDrag">☰</span>
+      <span class="slot-label"><%= slot.changeover? ? "転換" : "出演" %></span>
+    </div>
+    <div class="flex flex-wrap items-center gap-3 text-xs font-semibold">
+      <button type="button" class="text-slate-500 hover:text-slate-700" data-action="timetable-editor#setPerformance">出演枠に変更</button>
+      <button type="button" class="text-slate-500 hover:text-slate-700" data-action="timetable-editor#setChangeover">転換枠に変更</button>
+      <button type="button" class="text-slate-500 hover:text-slate-700" data-action="timetable-editor#setOther">その他の枠に変更</button>
+      <button type="button" class="text-rose-600 hover:text-rose-500" data-timetable-editor-target="deleteButton" data-action="timetable-editor#removeSlot">削除</button>
+    </div>
+  </div>
+
+  <div class="mt-4 grid gap-4 md:grid-cols-2">
+    <%= f.hidden_field :id %>
+    <%= f.hidden_field :position, value: slot.position, data: { timetable_editor_target: "position" } %>
+    <%= f.hidden_field :changeover, value: slot.changeover?, data: { timetable_editor_target: "changeover" } %>
+    <%= f.hidden_field :_destroy, value: false, data: { timetable_editor_target: "destroy" } %>
+
+    <div>
+      <%= f.label :artist_id, "出演アーティスト", class: "block text-xs font-semibold uppercase tracking-wide text-slate-500" %>
+      <%= f.collection_select :artist_id, artists, :id, :name,
+            { include_blank: "未定" },
+            { data: { timetable_editor_target: "artist", action: "change->timetable-editor#artistUpdated" }, class: "mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200" } %>
+    </div>
+
+    <div class="md:col-span-1">
+      <%= f.label :start_time, "開始時刻", class: "block text-xs font-semibold uppercase tracking-wide text-slate-500" %>
+      <%= f.time_field :start_time,
+            data: { timetable_editor_target: "startInput" },
+            class: "mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200" %>
+    </div>
+
+    <div class="md:col-span-1">
+      <%= f.label :end_time, "終了時刻", class: "block text-xs font-semibold uppercase tracking-wide text-slate-500" %>
+      <%= f.time_field :end_time,
+            data: { timetable_editor_target: "endInput" },
+            class: "mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200" %>
+    </div>
+  </div>
+</div>

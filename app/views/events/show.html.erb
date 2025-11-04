@@ -1,0 +1,250 @@
+<% can_manage_event = current_user&.organizer? && @event.organizer_id == current_user.id %>
+
+<div class="flex flex-wrap items-center justify-between gap-4">
+  <div>
+    <div class="flex items-center gap-3 text-sm text-slate-500">
+      <%= link_to "イベント一覧", events_path, class: "hover:text-sky-500" %>
+      <span>/</span>
+      <span>詳細</span>
+    </div>
+    <h1 class="mt-1 text-3xl font-semibold text-slate-900"><%= @event.name %></h1>
+    <p class="mt-1 text-sm text-slate-500"><%= l @event.event_date %> @ <%= @event.venue %></p>
+  </div>
+  <% if can_manage_event %>
+    <div class="flex flex-wrap items-center gap-3">
+      <%= link_to "編集", edit_event_path(@event), class: "inline-flex items-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50" %>
+      <%= link_to "タイムテーブルを編集", edit_timetable_event_path(@event), class: "inline-flex items-center rounded-lg bg-sky-600 px-4 py-2 text-sm font-semibold text-white shadow transition hover:bg-sky-500" %>
+      <%= button_to "公開する", publish_event_path(@event), method: :post, class: "inline-flex items-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow transition hover:bg-emerald-500", form: { data: { turbo_confirm: "公開しますか？" } }, disabled: @event.published? %>
+      <%= button_to "削除", @event, method: :delete,
+            form: { data: { turbo_confirm: "イベントを削除しますか？この操作は取り消せません。" } },
+            class: "inline-flex items-center rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white shadow transition hover:bg-rose-500" %>
+    </div>
+  <% end %>
+</div>
+
+<div class="mt-8 grid gap-6 lg:grid-cols-2">
+  <section class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <h2 class="text-lg font-semibold text-slate-800">イベント概要</h2>
+    <dl class="mt-4 space-y-3">
+      <div class="flex items-baseline justify-between text-sm">
+        <dt class="text-slate-500">開催日</dt>
+        <dd class="font-medium text-slate-800"><%= l @event.event_date %></dd>
+      </div>
+      <div class="flex items-baseline justify-between text-sm">
+        <dt class="text-slate-500">会場</dt>
+        <dd class="font-medium text-slate-800"><%= @event.venue %></dd>
+      </div>
+      <div class="flex items-baseline justify-between text-sm">
+        <dt class="text-slate-500">開場</dt>
+        <dd class="font-medium text-slate-800"><%= @event.door_time&.strftime("%H:%M") || "未設定" %></dd>
+      </div>
+      <div class="flex items-baseline justify-between text-sm">
+        <dt class="text-slate-500">開演</dt>
+        <dd class="font-medium text-slate-800"><%= @event.start_time&.strftime("%H:%M") || "未設定" %></dd>
+      </div>
+      <div class="border-t border-slate-100 pt-3 text-sm">
+        <div class="flex justify-between">
+          <span class="text-slate-500">イベント料</span>
+          <span class="font-medium text-slate-800">¥<%= number_with_delimiter(@event.event_fee) %></span>
+        </div>
+        <div class="mt-1 flex justify-between">
+          <span class="text-slate-500">ドリンク料</span>
+          <span class="font-medium text-slate-800">¥<%= number_with_delimiter(@event.drink_fee) %></span>
+        </div>
+        <div class="mt-3 flex items-center justify-between rounded-lg bg-slate-100 px-3 py-2 font-semibold text-slate-700">
+          <span>合計</span>
+          <span>¥<%= number_with_delimiter(@event.entrance_fee) %></span>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <% badge_color = @event.published? ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700" %>
+        <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold <%= badge_color %>"><%= @event.state_i18n %></span>
+      </div>
+      <% if @event.description.present? %>
+        <div class="rounded-lg bg-slate-50 px-3 py-3 text-sm text-slate-600">
+          <%= simple_format(@event.description) %>
+        </div>
+      <% end %>
+    </dl>
+  </section>
+
+  <section class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <div class="flex items-start justify-between gap-4">
+      <div>
+        <h2 class="text-lg font-semibold text-slate-800">割引内容</h2>
+        <p class="mt-1 text-sm text-slate-500">割引マスタで登録した内容から適用する割引を選択できます。</p>
+      </div>
+      <% if can_manage_event %>
+        <%= link_to "割引を管理", discounts_path, class: "inline-flex items-center rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50" %>
+      <% end %>
+    </div>
+
+    <div class="mt-4 space-y-5" data-controller="discount-selection">
+      <div class="grid gap-4 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
+        <div>
+          <label for="discount-preview" class="block text-xs font-semibold uppercase tracking-wide text-slate-500">割引を確認</label>
+          <%= select_tag :discount_preview,
+                options_from_collection_for_select(@available_discounts, :id, :name),
+                include_blank: "割引を選択",
+                data: { action: "change->discount-selection#selectChanged" },
+                class: "mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200" %>
+          <div class="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm">
+            <div class="font-semibold text-slate-700" data-discount-selection-target="summaryName">割引を選択してください</div>
+            <div class="mt-1 text-slate-600" data-discount-selection-target="summaryDetails"></div>
+          </div>
+        </div>
+        <div class="rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm">
+          <div class="flex justify-between text-slate-600">
+            <span>通常料金</span>
+            <span>¥<%= number_with_delimiter(@event.entrance_fee) %></span>
+          </div>
+          <div class="mt-2 flex items-center justify-between rounded-lg bg-slate-900 px-3 py-2 font-semibold text-white shadow">
+            <span>割引後料金</span>
+            <span>¥<%= number_with_delimiter(@discounted_price) %></span>
+          </div>
+        </div>
+      </div>
+
+      <% if can_manage_event %>
+        <%= form_with model: @event, url: apply_discounts_event_path(@event), method: :patch, local: true, data: { turbo: false }, class: "space-y-4" do |form| %>
+          <%= form.hidden_field :discount_ids, value: "" %>
+          <div class="grid gap-3">
+            <% @available_discounts.each do |discount| %>
+              <% effect_label = discount.kind_percentage? ? "#{discount.value}% 割引" : "¥#{number_with_delimiter(discount.value)} 引き" %>
+              <% detail_text = [effect_label, discount.description.presence].compact.join(" / ") %>
+              <label class="flex cursor-pointer items-start gap-3 rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm shadow-sm transition hover:border-sky-300"
+                     data-discount-selection-target="row"
+                     data-discount-id="<%= discount.id %>"
+                     data-discount-name="<%= discount.name %>"
+                     data-discount-details="<%= detail_text %>">
+                <%= check_box_tag "event[discount_ids][]",
+                      discount.id,
+                      @event.discount_ids.include?(discount.id),
+                      class: "mt-1 h-4 w-4 rounded border-slate-300 text-sky-600 focus:ring-sky-200" %>
+                <div>
+                  <div class="text-sm font-semibold text-slate-800"><%= discount.name %></div>
+                  <div class="mt-1 text-xs text-slate-500"><%= detail_text %></div>
+                </div>
+              </label>
+            <% end %>
+            <% if @available_discounts.blank? %>
+              <div class="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-500">
+                割引が登録されていません。<%= link_to "割引を追加する", new_discount_path, class: "font-semibold text-sky-600 hover:text-sky-500" %>
+              </div>
+            <% end %>
+          </div>
+          <div class="flex justify-end">
+            <%= form.submit "割引を適用", class: "inline-flex items-center rounded-lg bg-sky-600 px-5 py-2 text-sm font-semibold text-white shadow transition hover:bg-sky-500" %>
+          </div>
+        <% end %>
+      <% else %>
+        <div class="grid gap-3">
+          <% @event.discounts.ordered.each do |discount| %>
+            <% effect_label = discount.kind_percentage? ? "#{discount.value}% 割引" : "¥#{number_with_delimiter(discount.value)} 引き" %>
+            <% detail_text = [effect_label, discount.description.presence].compact.join(" / ") %>
+            <div class="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm">
+              <div class="font-semibold text-slate-800"><%= discount.name %></div>
+              <div class="mt-1 text-xs text-slate-500"><%= detail_text %></div>
+            </div>
+          <% end %>
+          <% if @event.discounts.blank? %>
+            <div class="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-500">
+              適用されている割引はありません。
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </section>
+</div>
+
+<section class="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+  <% timetables = @event_timetables || [] %>
+  <% unassigned = timetables.any? { |t| t.timetable_slots.any? { |slot| !slot.changeover? && slot.artist.nil? } } %>
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <h2 class="text-lg font-semibold text-slate-800">タイムテーブル</h2>
+    <div class="flex items-center gap-3">
+      <% if unassigned %>
+        <span class="rounded-lg bg-rose-100 px-3 py-1 text-xs font-semibold text-rose-700">出演アーティスト未定の枠があります</span>
+      <% end %>
+      <% if can_manage_event %>
+        <%= link_to "タイムテーブルを編集", edit_timetable_event_path(@event), class: "text-sm font-semibold text-sky-600 hover:text-sky-500" %>
+      <% end %>
+    </div>
+  </div>
+  <% if timetables.present? %>
+    <div class="mt-4 space-y-6">
+      <% timetables.each do |timetable| %>
+        <div class="overflow-hidden rounded-xl border border-slate-200">
+          <div class="flex items-center justify-between bg-slate-50 px-4 py-3">
+            <div class="text-sm font-semibold text-slate-700">ステージ: <%= timetable.stage_name %></div>
+            <% if can_manage_event %>
+              <span class="text-xs text-slate-400">順序 <%= timetable.position.to_i + 1 %></span>
+            <% end %>
+          </div>
+          <table class="min-w-full divide-y divide-slate-200 text-sm">
+            <thead class="bg-white text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
+              <tr>
+                <th class="px-4 py-3">開始</th>
+                <th class="px-4 py-3">終了</th>
+                <th class="px-4 py-3">枠種別</th>
+                <th class="px-4 py-3">出演者</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              <% timetable.timetable_slots.each do |slot| %>
+                <tr class="hover:bg-slate-50">
+                  <td class="px-4 py-3 font-mono text-slate-700"><%= slot.start_time.strftime("%H:%M") %></td>
+                  <td class="px-4 py-3 font-mono text-slate-700"><%= slot.end_time.strftime("%H:%M") %></td>
+                  <td class="px-4 py-3">
+                    <% label_class = slot.changeover? ? "bg-amber-100 text-amber-700" : "bg-emerald-100 text-emerald-700" %>
+                    <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold <%= label_class %>"><%= slot.changeover? ? "転換" : (slot.artist.present? ? "出演" : "その他") %></span>
+                  </td>
+                  <td class="px-4 py-3 text-slate-600">
+                    <% if slot.artist %>
+                      <%= link_to slot.artist.name, slot.artist, class: "text-sky-600 hover:text-sky-500" %>
+                    <% else %>
+                      <span class="<%= slot.changeover? ? "text-slate-400" : "text-rose-500 font-semibold" %>">
+                        <%= slot.changeover? ? "-" : "出演者未定" %>
+                      </span>
+                    <% end %>
+                  </td>
+                </tr>
+              <% end %>
+              <% if timetable.timetable_slots.blank? %>
+                <tr>
+                  <td colspan="4" class="px-4 py-6 text-center text-sm text-slate-500">枠が登録されていません</td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="mt-4 rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-center text-sm text-slate-500">
+      タイムテーブルが登録されていません。
+    </div>
+  <% end %>
+</section>
+
+<section class="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+  <div class="flex items-center justify-between">
+    <h2 class="text-lg font-semibold text-slate-800">評価メモ</h2>
+    <% if current_user&.organizer? && @event.organizer_id == current_user.id %>
+      <%= link_to "CSVをインポート", new_event_evaluation_memo_path(@event), class: "text-sm font-semibold text-sky-600 hover:text-sky-500" %>
+    <% end %>
+  </div>
+  <div class="mt-4 space-y-3 text-sm">
+    <% if @event.evaluation_memos.present? %>
+      <% @event.evaluation_memos.each do |memo| %>
+        <article class="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
+          <h3 class="text-xs font-semibold uppercase tracking-wide text-slate-500"><%= memo.category %></h3>
+          <div class="mt-1 whitespace-pre-wrap text-slate-700"><%= memo.note %></div>
+        </article>
+      <% end %>
+    <% else %>
+      <p class="rounded-lg bg-slate-50 px-4 py-3 text-slate-500">インポート済みのメモはありません。</p>
+    <% end %>
+  </div>
+</section>

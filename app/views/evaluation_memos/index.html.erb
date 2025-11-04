@@ -1,0 +1,27 @@
+<h1>評価メモ</h1>
+
+<p><%= link_to "イベントに戻る", event_path(@event) %></p>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>カテゴリ</th>
+      <th>内容</th>
+      <th>元CSV行</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @evaluation_memos.each do |memo| %>
+      <tr>
+        <td><%= memo.category %></td>
+        <td><%= simple_format(memo.note) %></td>
+        <td><%= memo.source_row || "-" %></td>
+      </tr>
+    <% end %>
+    <% if @evaluation_memos.blank? %>
+      <tr>
+        <td colspan="3">メモが登録されていません</td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

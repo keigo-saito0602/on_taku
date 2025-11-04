@@ -1,0 +1,40 @@
+<div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+  <%= form_with model: [@event, @timetable_slot], html: { class: "space-y-5" } do |form| %>
+    <% if @timetable_slot.errors.any? %>
+      <div class="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
+        <p class="font-semibold">入力内容にエラーがあります。</p>
+        <ul class="mt-2 list-disc pl-5">
+          <% @timetable_slot.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div>
+      <%= form.label :artist_id, "出演アーティスト", class: "block text-sm font-medium text-slate-700" %>
+      <%= form.collection_select :artist_id, @artists, :id, :name, { prompt: "選択してください" }, class: "mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200" %>
+    </div>
+
+    <div class="grid gap-4 md:grid-cols-2">
+      <div>
+        <%= form.label :start_time, "開始時刻", class: "block text-sm font-medium text-slate-700" %>
+        <%= form.time_field :start_time, required: true, class: "mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200" %>
+      </div>
+      <div>
+        <%= form.label :end_time, "終了時刻", class: "block text-sm font-medium text-slate-700" %>
+        <%= form.time_field :end_time, required: true, class: "mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200" %>
+      </div>
+    </div>
+
+    <div>
+      <%= form.label :stage_name, "ステージ", class: "block text-sm font-medium text-slate-700" %>
+      <%= form.text_field :stage_name, class: "mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200" %>
+    </div>
+
+    <div class="flex justify-end gap-3">
+      <%= link_to "キャンセル", @event, class: "inline-flex items-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50" %>
+      <%= form.submit class: "inline-flex items-center rounded-lg bg-sky-600 px-5 py-2 text-sm font-semibold text-white shadow transition hover:bg-sky-500" %>
+    </div>
+  <% end %>
+</div>

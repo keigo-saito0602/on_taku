@@ -1,0 +1,48 @@
+<%= form_with model: discount, local: true, class: "space-y-6" do |f| %>
+  <% if discount.errors.any? %>
+    <div class="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+      <p class="font-semibold">入力内容を確認してください。</p>
+      <ul class="mt-2 list-disc space-y-1 pl-5">
+        <% discount.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= f.label :name, "割引名", class: "block text-sm font-semibold text-slate-700" %>
+    <%= f.text_field :name, class: "mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200" %>
+  </div>
+
+  <div class="grid gap-4 md:grid-cols-2">
+    <div>
+      <%= f.label :kind, "割引種別", class: "block text-sm font-semibold text-slate-700" %>
+      <%= f.select :kind,
+            Discount.kinds.keys.map { |k| [k == "percentage" ? "割合 (%)" : "固定額 (円)", k] },
+            {},
+            class: "mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200" %>
+    </div>
+    <div>
+      <%= f.label :value, "割引値", class: "block text-sm font-semibold text-slate-700" %>
+      <%= f.number_field :value, min: 0, class: "mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200" %>
+      <p class="mt-1 text-xs text-slate-500">割合は0〜100%、固定額は0〜50,000円。</p>
+    </div>
+  </div>
+
+  <div>
+    <%= f.label :priority, "適用順序", class: "block text-sm font-semibold text-slate-700" %>
+    <%= f.number_field :priority, min: 0, class: "mt-1 w-32 rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200" %>
+    <p class="mt-1 text-xs text-slate-500">値が小さいものから順に適用されます。</p>
+  </div>
+
+  <div>
+    <%= f.label :description, "説明", class: "block text-sm font-semibold text-slate-700" %>
+    <%= f.text_area :description, rows: 3, class: "mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200" %>
+  </div>
+
+  <div class="flex justify-end gap-3">
+    <%= link_to "一覧に戻る", discounts_path, class: "inline-flex items-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50" %>
+    <%= f.submit class: "inline-flex items-center rounded-lg bg-sky-600 px-5 py-2 text-sm font-semibold text-white shadow transition hover:bg-sky-500" %>
+  </div>
+<% end %>

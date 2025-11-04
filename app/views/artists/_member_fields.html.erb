@@ -1,0 +1,24 @@
+<div class="rounded-lg border border-slate-200 bg-white px-4 py-3 shadow-sm" data-nested-fields-target="item">
+  <%= f.hidden_field :id %>
+  <%= f.hidden_field :position, value: f.object.position, data: { optional: true } %>
+  <%= f.hidden_field :_destroy, value: false, data: { "nested-fields-destroy": true } %>
+
+  <div class="grid gap-3 md:grid-cols-3">
+    <div class="md:col-span-1">
+      <%= f.label :name, "メンバー名", class: "block text-xs font-semibold uppercase tracking-wide text-slate-500" %>
+      <%= f.text_field :name, class: "mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200" %>
+    </div>
+    <div class="md:col-span-1">
+      <%= f.label :instrument, "担当楽器", class: "block text-xs font-semibold uppercase tracking-wide text-slate-500" %>
+      <%= f.text_field :instrument, class: "mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200", placeholder: "Guitar" %>
+    </div>
+    <div class="md:col-span-1">
+      <%= f.label :role, "役割/コーラス", class: "block text-xs font-semibold uppercase tracking-wide text-slate-500" %>
+      <%= f.text_field :role, class: "mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200", placeholder: "Leader" %>
+    </div>
+  </div>
+
+  <div class="mt-3 flex justify-end">
+    <button type="button" class="text-xs font-semibold text-rose-600 hover:text-rose-500" data-action="nested-fields#remove">削除</button>
+  </div>
+</div>

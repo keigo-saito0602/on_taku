@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    @apply bg-slate-100 font-sans text-slate-900;
+  }
+  h1, h2, h3, h4, h5 {
+    @apply tracking-tight;
+  }
+  a {
+    @apply transition-colors;
+  }
+  table {
+    @apply w-full;
+  }
+}
+
+@layer components {
+  .slot-hidden {
+    @apply hidden;
+  }
+  .stage-hidden {
+    @apply hidden;
+  }
+}

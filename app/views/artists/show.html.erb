@@ -1,0 +1,109 @@
+<div class="flex items-center justify-between gap-4">
+  <div>
+    <h1 class="text-2xl font-semibold text-slate-900"><%= @artist.name %></h1>
+    <p class="mt-1 text-sm text-slate-500">出演イベントやプロフィールを確認できます。</p>
+  </div>
+  <% if current_user&.organizer? %>
+    <div class="flex items-center gap-3">
+      <%= link_to "編集", edit_artist_path(@artist), class: "inline-flex items-center rounded-lg bg-sky-600 px-4 py-2 text-sm font-semibold text-white shadow transition hover:bg-sky-500" %>
+      <%= button_to "削除", @artist, method: :delete,
+            form: { data: { turbo_confirm: "このアーティストを削除しますか？" } },
+            class: "inline-flex items-center rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white shadow transition hover:bg-rose-500" %>
+    </div>
+  <% end %>
+</div>
+
+<div class="mt-6 grid gap-6 lg:grid-cols-2">
+  <section class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <h2 class="text-lg font-semibold text-slate-800">プロフィール</h2>
+    <dl class="mt-4 space-y-3 text-sm">
+      <div class="flex items-baseline justify-between">
+        <dt class="text-slate-500">ジャンル</dt>
+        <dd class="font-medium text-slate-800"><%= @artist.genre.presence || "-" %></dd>
+      </div>
+      <div class="flex items-baseline justify-between">
+        <dt class="text-slate-500">区分</dt>
+        <dd class="font-medium text-slate-800"><%= Artist.human_enum_name(:kind, @artist.kind) %></dd>
+      </div>
+      <div class="flex items-baseline justify-between">
+        <dt class="text-slate-500">公開状態</dt>
+        <dd>
+          <% badge = @artist.published? ? "bg-emerald-100 text-emerald-700" : "bg-slate-200 text-slate-600" %>
+          <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold <%= badge %>"><%= @artist.published? ? "公開" : "非公開" %></span>
+        </dd>
+      </div>
+      <div>
+        <dt class="text-slate-500">公式リンク</dt>
+        <dd class="mt-1">
+          <% if @artist.official_link.present? %>
+            <%= link_to @artist.official_link, @artist.official_link, target: "_blank", rel: "noopener", class: "text-sky-600 hover:text-sky-500" %>
+          <% else %>
+            <span class="text-slate-400">-</span>
+          <% end %>
+        </dd>
+      </div>
+      <div>
+        <dt class="text-slate-500">SNSリンク</dt>
+        <dd class="mt-1 space-y-2">
+          <% if @artist.social_links.any? %>
+            <% @artist.social_links.each do |link| %>
+              <div>
+                <%= link_to(link.url, link.url, target: "_blank", rel: "noopener", class: "text-sky-600 hover:text-sky-500") %>
+                <% if link.label.present? %>
+                  <span class="ml-2 text-xs text-slate-500">(<%= link.label %>)</span>
+                <% end %>
+              </div>
+            <% end %>
+          <% else %>
+            <span class="text-slate-400">-</span>
+          <% end %>
+        </dd>
+      </div>
+    </dl>
+  </section>
+
+  <section class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <h2 class="text-lg font-semibold text-slate-800">出演イベント</h2>
+    <ul class="mt-4 space-y-2 text-sm text-slate-600">
+      <% if @artist.events.present? %>
+        <% @artist.events.distinct.order(:event_date).each do |event| %>
+          <li class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+            <%= link_to "#{l(event.event_date)} #{event.name}", event, class: "font-medium text-sky-600 hover:text-sky-500" %>
+          </li>
+        <% end %>
+      <% else %>
+        <li class="rounded-lg bg-slate-50 px-3 py-2 text-slate-500">出演予定はありません</li>
+      <% end %>
+    </ul>
+  </section>
+</div>
+
+<section class="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+  <div class="flex items-center justify-between">
+    <h2 class="text-lg font-semibold text-slate-800">メンバー</h2>
+    <% if @artist.members.any? %>
+      <span class="text-xs text-slate-400">人数 <%= @artist.members.count %></span>
+    <% end %>
+  </div>
+  <div class="mt-4">
+    <% if @artist.members.any? %>
+      <ul class="space-y-2 text-sm text-slate-700">
+        <% @artist.members.each do |member| %>
+          <li class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+            <div class="font-semibold text-slate-800"><%= member.name %></div>
+            <div class="mt-1 text-xs text-slate-500">
+              <% details = [member.instrument.presence, member.role.presence].compact %>
+              <% if details.any? %>
+                <%= details.join(" / ") %>
+              <% else %>
+                担当未設定
+              <% end %>
+            </div>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p class="rounded-lg bg-slate-50 px-3 py-3 text-sm text-slate-500">登録されたメンバーはいません。</p>
+    <% end %>
+  </div>
+</section>

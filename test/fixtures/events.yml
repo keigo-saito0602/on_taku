@@ -1,0 +1,27 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  organizer: one
+  name: MyString
+  event_date: 2025-11-02
+  venue: MyString
+  event_fee: 1
+  drink_fee: 0
+  entrance_fee: 1
+  door_time: 2025-11-02 23:24:10
+  start_time: 2025-11-02 23:24:10
+  state: 1
+  description: MyText
+
+two:
+  organizer: two
+  name: MyString
+  event_date: 2025-11-02
+  venue: MyString
+  event_fee: 1
+  drink_fee: 0
+  entrance_fee: 1
+  door_time: 2025-11-02 23:24:10
+  start_time: 2025-11-02 23:24:10
+  state: 1
+  description: MyText

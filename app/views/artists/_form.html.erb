@@ -1,0 +1,97 @@
+<%= form_with model: artist,
+              data: { controller: "artist-form", "artist-form-member-kinds-value": %w[band unit ensemble].to_json },
+              html: { class: "space-y-8" } do |form| %>
+  <% if artist.errors.any? %>
+    <div class="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
+      <p class="font-semibold">入力内容にエラーがあります。</p>
+      <ul class="mt-2 list-disc pl-5">
+        <% artist.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.label :name, "アーティスト名", class: "block text-sm font-medium text-slate-700" %>
+    <%= form.text_field :name, required: true, class: "mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200" %>
+  </div>
+
+  <div class="grid gap-4 md:grid-cols-2">
+    <div>
+      <%= form.label :genre, "ジャンル", class: "block text-sm font-medium text-slate-700" %>
+      <%= form.text_field :genre, class: "mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200" %>
+    </div>
+    <div>
+      <%= form.label :kind, "区分", class: "block text-sm font-medium text-slate-700" %>
+      <%= form.select :kind,
+            Artist.kinds.keys.map { |k| [Artist.human_enum_name(:kind, k), k] },
+            {},
+            class: "mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200",
+            data: { "artist-form-target": "kindSelect", action: "change->artist-form#kindChanged" } %>
+    </div>
+  </div>
+
+  <div>
+    <%= form.label :official_link, "公式リンク", class: "block text-sm font-medium text-slate-700" %>
+    <%= form.url_field :official_link, placeholder: "https://example.com", class: "mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200" %>
+  </div>
+
+  <label class="flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
+    <%= form.check_box :published, class: "h-4 w-4 rounded border-slate-300 text-sky-600 focus:ring-sky-200" %>
+    <span>公開する</span>
+  </label>
+
+  <section class="space-y-3 rounded-xl border border-slate-200 bg-white p-5 shadow-sm" data-controller="nested-fields">
+    <div class="flex items-center justify-between">
+      <h2 class="text-sm font-semibold text-slate-800">SNSリンク</h2>
+      <button type="button" class="text-xs font-semibold text-sky-600 hover:text-sky-500" data-action="nested-fields#add">リンクを追加</button>
+    </div>
+    <div class="space-y-3" data-nested-fields-target="container">
+      <% artist.social_links.each do |link| %>
+        <%= form.fields_for :social_links, link do |link_fields| %>
+          <%= render "artists/social_link_fields", f: link_fields %>
+        <% end %>
+      <% end %>
+      <% if artist.social_links.empty? %>
+        <p class="rounded-lg bg-slate-50 px-4 py-3 text-sm text-slate-500">リンクは未登録です。「リンクを追加」ボタンから登録できます。</p>
+      <% end %>
+    </div>
+    <% new_link = artist.social_links.build(label: "", url: "") %>
+    <% social_template = form.fields_for :social_links, new_link, child_index: "NEW_RECORD" do |link_fields| %>
+      <%= render "artists/social_link_fields", f: link_fields %>
+    <% end %>
+    <% artist.social_links.delete(new_link) %>
+    <template data-nested-fields-target="template"><%= social_template %></template>
+  </section>
+
+  <section class="space-y-3 rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
+           data-artist-form-target="membersSection"
+           data-controller="nested-fields">
+    <div class="flex items-center justify-between">
+      <h2 class="text-sm font-semibold text-slate-800">メンバー情報</h2>
+      <button type="button" class="text-xs font-semibold text-sky-600 hover:text-sky-500" data-action="nested-fields#add">メンバーを追加</button>
+    </div>
+    <div class="space-y-3" data-nested-fields-target="container">
+      <% artist.members.each do |member| %>
+        <%= form.fields_for :members, member do |member_fields| %>
+          <%= render "artists/member_fields", f: member_fields %>
+        <% end %>
+      <% end %>
+      <% if artist.members.empty? %>
+        <p class="rounded-lg bg-slate-50 px-4 py-3 text-sm text-slate-500">バンドやユニットの場合にメンバーを登録してください。</p>
+      <% end %>
+    </div>
+    <% new_member = artist.members.build(name: "", instrument: "", role: "") %>
+    <% member_template = form.fields_for :members, new_member, child_index: "NEW_RECORD" do |member_fields| %>
+      <%= render "artists/member_fields", f: member_fields %>
+    <% end %>
+    <% artist.members.delete(new_member) %>
+    <template data-nested-fields-target="template"><%= member_template %></template>
+  </section>
+
+  <div class="flex justify-end gap-3">
+    <%= link_to "キャンセル", artist.persisted? ? artist : artists_path, class: "inline-flex items-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50" %>
+    <%= form.submit class: "inline-flex items-center rounded-lg bg-sky-600 px-5 py-2 text-sm font-semibold text-white shadow transition hover:bg-sky-500" %>
+  </div>
+<% end %>

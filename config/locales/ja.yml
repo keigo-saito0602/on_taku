@@ -1,0 +1,64 @@
+ja:
+  activerecord:
+    models:
+      event: イベント
+      artist: アーティスト
+      user: ユーザー
+      timetable_slot: タイムテーブル枠
+      evaluation_memo: 評価メモ
+    attributes:
+      event:
+        name: イベント名
+        event_date: 開催日
+        venue: 開催場所
+        event_fee: イベント料
+        drink_fee: ドリンク料
+        entrance_fee: エントランス料
+        door_time: 開場時刻
+        start_time: 開演時刻
+        state: 状態
+        description: 説明
+      artist:
+        name: アーティスト名
+        genre: ジャンル
+        official_link: 公式リンク
+        kind: 区分
+        published: 公開
+      timetable_slot:
+        start_time: 開始時刻
+        end_time: 終了時刻
+        stage_name: ステージ
+      evaluation_memo:
+        category: カテゴリ
+        note: 内容
+  enums:
+    event:
+      state:
+        draft: 下書き
+        published: 公開
+    artist:
+      kind:
+        band: バンド
+        dj: DJ
+        unit: ユニット
+        solo: ソロ
+        duo: デュオ
+        ensemble: アンサンブル
+        other: その他
+    user:
+      role:
+        organizer: 主催者
+        reviewer: 評価者
+  errors:
+    messages:
+      taken: "はすでに存在します"
+      invalid: "は不正な値です"
+  date:
+    formats:
+      default: "%Y/%m/%d"
+      long: "%Y年%m月%d日"
+      short: "%m/%d"
+  time:
+    formats:
+      default: "%Y/%m/%d %H:%M"
+      short: "%H:%M"

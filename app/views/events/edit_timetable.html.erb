@@ -1,0 +1,47 @@
+<% content_for :title, "タイムテーブル編集" %>
+
+<div class="space-y-3">
+  <h1 class="text-2xl font-semibold text-slate-900">タイムテーブル編集</h1>
+  <p class="text-sm text-slate-500">ステージごとにタイムテーブルを作成し、枠をドラッグ&ドロップで並べ替えできます。</p>
+</div>
+
+<%= form_with model: @event, url: update_timetable_event_path(@event), method: :patch, data: { controller: "timetable-stages" }, html: { class: "mt-6 space-y-6" } do |form| %>
+  <div class="space-y-6" data-timetable-stages-target="container">
+    <% @event.event_timetables.each do |timetable| %>
+      <%= form.fields_for :event_timetables, timetable do |timetable_fields| %>
+        <%= render "events/event_timetable_fields",
+              f: timetable_fields,
+              artists: @artists,
+              allow_remove_stage: true %>
+      <% end %>
+    <% end %>
+  </div>
+
+  <div class="flex justify-between">
+    <button type="button"
+            class="inline-flex items-center rounded-lg border border-dashed border-slate-400 bg-white px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-sky-400 hover:text-sky-600"
+            data-action="timetable-stages#addStage">
+      タイムテーブルを追加
+    </button>
+    <%= link_to "イベント詳細に戻る", @event, class: "inline-flex items-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50" %>
+  </div>
+
+  <div class="flex justify-end">
+    <%= form.submit "タイムテーブルを保存", class: "inline-flex items-center rounded-lg bg-sky-600 px-5 py-2 text-sm font-semibold text-white shadow transition hover:bg-sky-500" %>
+  </div>
+
+  <% new_timetable = @event.event_timetables.build(stage_name: "新規ステージ", name: "新規ステージ", position: @event.event_timetables.size) %>
+  <% new_timetable.timetable_slots.build(
+       start_time: Time.zone.parse("18:00"),
+       end_time: Time.zone.parse("18:30"),
+       changeover: false
+     ) %>
+  <% stage_template = form.fields_for :event_timetables, new_timetable, child_index: "NEW_STAGE" do |timetable_fields| %>
+    <%= render "events/event_timetable_fields",
+          f: timetable_fields,
+          artists: @artists,
+          allow_remove_stage: true %>
+  <% end %>
+  <% @event.event_timetables.delete(new_timetable) %>
+  <template data-timetable-stages-target="template"><%= stage_template %></template>
+<% end %>

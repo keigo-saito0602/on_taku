@@ -1,0 +1,53 @@
+<div class="flex items-end justify-between gap-4">
+  <div>
+    <h1 class="text-2xl font-semibold text-slate-900">イベント一覧</h1>
+    <p class="mt-1 text-sm text-slate-500">開催日順に並んだイベントの集計です。</p>
+  </div>
+  <% if current_user&.organizer? %>
+    <%= link_to "イベントを作成", new_event_path, class: "inline-flex items-center rounded-lg bg-sky-600 px-4 py-2 text-sm font-semibold text-white shadow transition hover:bg-sky-500" %>
+  <% end %>
+</div>
+
+<div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow">
+  <table class="min-w-full divide-y divide-slate-200 text-sm">
+    <thead class="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">
+      <tr>
+        <th class="px-4 py-3">開催日</th>
+        <th class="px-4 py-3">イベント名</th>
+        <th class="px-4 py-3">会場</th>
+        <th class="px-4 py-3">料金</th>
+        <th class="px-4 py-3">状態</th>
+        <th class="px-4 py-3 text-right">操作</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-slate-100 bg-white">
+      <% @events.each do |event| %>
+        <tr class="hover:bg-slate-50">
+          <td class="px-4 py-3 text-slate-700"><%= l event.event_date %></td>
+          <td class="px-4 py-3">
+            <%= link_to event.name, event, class: "font-semibold text-sky-600 hover:text-sky-500" %>
+          </td>
+          <td class="px-4 py-3 text-slate-600"><%= event.venue %></td>
+          <td class="px-4 py-3 text-slate-600">
+            <div class="font-semibold text-slate-800">¥<%= number_with_delimiter(event.entrance_fee) %></div>
+            <div class="text-xs text-slate-500">イベント ¥<%= number_with_delimiter(event.event_fee) %> / ドリンク ¥<%= number_with_delimiter(event.drink_fee) %></div>
+          </td>
+          <td class="px-4 py-3">
+            <% badge_color = event.published? ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700" %>
+            <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold <%= badge_color %>"><%= event.state_i18n %></span>
+          </td>
+          <td class="px-4 py-3 text-right text-xs font-semibold text-slate-500">
+            <% if current_user&.organizer? && event.organizer_id == current_user.id %>
+              <div class="flex justify-end gap-3">
+                <%= link_to "編集", edit_event_path(event), class: "text-sky-600 hover:text-sky-500" %>
+                <%= link_to "詳細", event, class: "text-slate-500 hover:text-slate-700" %>
+              </div>
+            <% else %>
+              <span class="text-slate-300">-</span>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
