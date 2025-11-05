@@ -92,6 +92,6 @@
 
   <div class="flex justify-end gap-3">
     <%= link_to "キャンセル", artist.persisted? ? artist : artists_path, class: "inline-flex items-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50" %>
-    <%= form.submit class: "inline-flex items-center rounded-lg bg-sky-600 px-5 py-2 text-sm font-semibold text-white shadow transition hover:bg-sky-500" %>
+    <%= form.submit "保存", class: "inline-flex items-center rounded-lg bg-sky-600 px-5 py-2 text-sm font-semibold text-white shadow transition hover:bg-sky-500" %>
   </div>
 <% end %>

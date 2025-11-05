@@ -51,7 +51,10 @@ class EventsController < ApplicationController
       redirect_to @event, success: "イベントを公開しました"
     else
       load_show_context
-      flash.now[:alert] = "公開できません"
+      message_lines = [ "公開に必要な情報が不足しています。", *@event.errors.full_messages ]
+      flash.now[:alert] = message_lines.join(" ")
+      flash.now[:alert_dialog_title] = "公開できません"
+      flash.now[:alert_dialog] = message_lines.join("\n")
       render :show, status: :unprocessable_entity
     end
   end
@@ -72,7 +75,7 @@ class EventsController < ApplicationController
   end
 
   def apply_discounts
-    discount_ids = Array(params.dig(:event, :discount_ids)).reject(&:blank?)
+    discount_ids = extract_discount_ids
     if @event.update(discount_ids:)
       redirect_to @event, success: "割引を更新しました"
     else
@@ -121,6 +124,8 @@ class EventsController < ApplicationController
           :start_time,
           :end_time,
           :changeover,
+          :slot_kind,
+          :stage_name,
           :position,
           :_destroy
         ]
@@ -154,5 +159,11 @@ class EventsController < ApplicationController
     @timetable_slots = @event_timetables.flat_map(&:timetable_slots)
     @available_discounts = Discount.ordered
     @discounted_price = @event.discounted_price
+  end
+
+  def extract_discount_ids
+    raw_ids =
+      params.fetch(:discount_assignment, {}).fetch(:ids, [])
+    Array.wrap(raw_ids).flatten.reject(&:blank?).map(&:to_i)
   end
 end

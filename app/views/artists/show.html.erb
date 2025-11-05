@@ -1,16 +1,22 @@
 <div class="flex items-center justify-between gap-4">
   <div>
-    <h1 class="text-2xl font-semibold text-slate-900"><%= @artist.name %></h1>
+    <div class="flex items-center gap-3 text-sm text-slate-500">
+      <%= link_to "アーティスト一覧", artists_path, class: "hover:text-sky-500" %>
+      <span>/</span>
+      <span>詳細</span>
+    </div>
+    <h1 class="mt-1 text-2xl font-semibold text-slate-900"><%= @artist.name %></h1>
     <p class="mt-1 text-sm text-slate-500">出演イベントやプロフィールを確認できます。</p>
   </div>
-  <% if current_user&.organizer? %>
-    <div class="flex items-center gap-3">
+  <div class="flex items-center gap-3">
+    <%= link_to "一覧に戻る", artists_path, class: "inline-flex items-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50" %>
+    <% if current_user&.organizer? %>
       <%= link_to "編集", edit_artist_path(@artist), class: "inline-flex items-center rounded-lg bg-sky-600 px-4 py-2 text-sm font-semibold text-white shadow transition hover:bg-sky-500" %>
       <%= button_to "削除", @artist, method: :delete,
             form: { data: { turbo_confirm: "このアーティストを削除しますか？" } },
             class: "inline-flex items-center rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white shadow transition hover:bg-rose-500" %>
-    </div>
-  <% end %>
+    <% end %>
+  </div>
 </div>
 
 <div class="mt-6 grid gap-6 lg:grid-cols-2">
@@ -35,10 +41,10 @@
       <div>
         <dt class="text-slate-500">公式リンク</dt>
         <dd class="mt-1">
-          <% if @artist.official_link.present? %>
-            <%= link_to @artist.official_link, @artist.official_link, target: "_blank", rel: "noopener", class: "text-sky-600 hover:text-sky-500" %>
+          <% if (official_url = safe_external_url(@artist.official_link)) %>
+            <%= link_to official_url, official_url, target: "_blank", rel: "noopener", class: "text-sky-600 hover:text-sky-500" %>
           <% else %>
-            <span class="text-slate-400">-</span>
+            <span class="text-slate-400"><%= @artist.official_link.presence || "-" %></span>
           <% end %>
         </dd>
       </div>
@@ -48,7 +54,11 @@
           <% if @artist.social_links.any? %>
             <% @artist.social_links.each do |link| %>
               <div>
-                <%= link_to(link.url, link.url, target: "_blank", rel: "noopener", class: "text-sky-600 hover:text-sky-500") %>
+                <% if (url = safe_external_url(link.url)) %>
+                  <%= link_to(url, url, target: "_blank", rel: "noopener", class: "text-sky-600 hover:text-sky-500") %>
+                <% else %>
+                  <span class="text-slate-400"><%= link.url.presence || "URL未設定" %></span>
+                <% end %>
                 <% if link.label.present? %>
                   <span class="ml-2 text-xs text-slate-500">(<%= link.label %>)</span>
                 <% end %>
@@ -78,15 +88,13 @@
   </section>
 </div>
 
-<section class="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-  <div class="flex items-center justify-between">
-    <h2 class="text-lg font-semibold text-slate-800">メンバー</h2>
-    <% if @artist.members.any? %>
+<% if @artist.members.any? %>
+  <section class="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <div class="flex items-center justify-between">
+      <h2 class="text-lg font-semibold text-slate-800">メンバー</h2>
       <span class="text-xs text-slate-400">人数 <%= @artist.members.count %></span>
-    <% end %>
-  </div>
-  <div class="mt-4">
-    <% if @artist.members.any? %>
+    </div>
+    <div class="mt-4">
       <ul class="space-y-2 text-sm text-slate-700">
         <% @artist.members.each do |member| %>
           <li class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
@@ -102,8 +110,6 @@
           </li>
         <% end %>
       </ul>
-    <% else %>
-      <p class="rounded-lg bg-slate-50 px-3 py-3 text-sm text-slate-500">登録されたメンバーはいません。</p>
-    <% end %>
-  </div>
-</section>
+    </div>
+  </section>
+<% end %>

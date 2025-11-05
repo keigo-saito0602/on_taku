@@ -44,10 +44,11 @@
               step: 100,
               class: "mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200",
               data: { action: "input->fee-calculator#recalculate", fee_calculator_target: "drinkFee" } %>
+        <p class="mt-1 text-xs text-slate-500">※別途メニューあり</p>
       </div>
     </div>
     <p class="mt-3 rounded-md bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-700">
-      合計: <span data-fee-calculator-target="total"><%= number_with_delimiter(event.event_fee.to_i + event.drink_fee.to_i) %></span> 円
+      合計: <span data-fee-calculator-target="total"><%= event.event_fee.to_i + event.drink_fee.to_i == 0 ? "無料" : "#{number_with_delimiter(event.event_fee.to_i + event.drink_fee.to_i)} 円" %></span>
     </p>
   </fieldset>
 
@@ -69,6 +70,6 @@
 
   <div class="flex justify-end gap-3">
     <%= link_to "キャンセル", event.persisted? ? event : events_path, class: "inline-flex items-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50" %>
-    <%= form.submit class: "inline-flex items-center rounded-lg bg-sky-600 px-5 py-2 text-sm font-semibold text-white shadow transition hover:bg-sky-500" %>
+    <%= form.submit "保存", class: "inline-flex items-center rounded-lg bg-sky-600 px-5 py-2 text-sm font-semibold text-white shadow transition hover:bg-sky-500" %>
   </div>
 <% end %>

@@ -75,7 +75,7 @@ class TimetableSlotsController < ApplicationController
       hour = minutes / 60
       minute = minutes % 60
       value = format("%02d:%02d", hour, minute)
-      [value, value]
+      [ value, value ]
     end
   end
 

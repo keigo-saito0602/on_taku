@@ -10,6 +10,6 @@ class CreateArtistMembers < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    add_index :artist_members, [:artist_id, :position]
+    add_index :artist_members, [ :artist_id, :position ]
   end
 end

@@ -29,8 +29,8 @@
           </td>
           <td class="px-4 py-3 text-slate-600"><%= event.venue %></td>
           <td class="px-4 py-3 text-slate-600">
-            <div class="font-semibold text-slate-800">¥<%= number_with_delimiter(event.entrance_fee) %></div>
-            <div class="text-xs text-slate-500">イベント ¥<%= number_with_delimiter(event.event_fee) %> / ドリンク ¥<%= number_with_delimiter(event.drink_fee) %></div>
+            <div class="font-semibold text-slate-800"><%= display_currency(event.entrance_fee) %></div>
+            <div class="text-xs text-slate-500">イベント <%= display_currency(event.event_fee) %> / ドリンク <%= display_currency(event.drink_fee) %></div>
           </td>
           <td class="px-4 py-3">
             <% badge_color = event.published? ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700" %>

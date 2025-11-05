@@ -9,6 +9,6 @@ class CreateTimetableSlots < ActiveRecord::Migration[8.1]
 
       t.timestamps
     end
-    add_index :timetable_slots, [:event_id, :start_time]
+    add_index :timetable_slots, [ :event_id, :start_time ]
   end
 end

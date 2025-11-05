@@ -34,10 +34,8 @@
           <td class="px-4 py-3 text-slate-500"><%= discount.description.presence || "-" %></td>
           <td class="px-4 py-3 text-right text-xs font-semibold text-slate-500">
             <div class="flex justify-end gap-3">
+              <%= link_to "詳細", discount, class: "text-slate-500 hover:text-slate-700" %>
               <%= link_to "編集", edit_discount_path(discount), class: "text-sky-600 hover:text-sky-500" %>
-              <%= button_to "削除", discount, method: :delete,
-                    form: { data: { turbo_confirm: "割引を削除しますか？" } },
-                    class: "text-rose-600 hover:text-rose-500" %>
             </div>
           </td>
         </tr>

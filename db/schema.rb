@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_11_04_144745) do
+ActiveRecord::Schema[8.1].define(version: 2025_11_05_090000) do
   create_table "artist_members", force: :cascade do |t|
     t.integer "artist_id", null: false
     t.datetime "created_at", null: false
@@ -112,13 +112,14 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_04_144745) do
   end
 
   create_table "timetable_slots", force: :cascade do |t|
-    t.integer "artist_id", null: false
+    t.integer "artist_id"
     t.boolean "changeover", default: false, null: false
     t.datetime "created_at", null: false
     t.time "end_time", null: false
     t.integer "event_id", null: false
     t.integer "event_timetable_id", null: false
     t.integer "position"
+    t.string "slot_kind", default: "performance", null: false
     t.string "stage_name"
     t.time "start_time", null: false
     t.datetime "updated_at", null: false
@@ -126,6 +127,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_04_144745) do
     t.index ["event_id", "start_time"], name: "index_timetable_slots_on_event_id_and_start_time"
     t.index ["event_id"], name: "index_timetable_slots_on_event_id"
     t.index ["event_timetable_id"], name: "index_timetable_slots_on_event_timetable_id"
+    t.index ["slot_kind"], name: "index_timetable_slots_on_slot_kind"
   end
 
   create_table "users", force: :cascade do |t|

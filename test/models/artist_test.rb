@@ -28,7 +28,7 @@ class ArtistTest < ActiveSupport::TestCase
     assert_difference -> { ArtistSocialLink.count }, 1 do
       @artist.save!
     end
-    assert_equal ["Twitter"], @artist.reload.social_links.pluck(:label)
+    assert_equal [ "Twitter" ], @artist.reload.social_links.pluck(:label)
   end
 
   test "ignores blank social links" do
