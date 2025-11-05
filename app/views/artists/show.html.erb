@@ -41,10 +41,10 @@
       <div>
         <dt class="text-slate-500">公式リンク</dt>
         <dd class="mt-1">
-          <% if @artist.official_link.present? %>
-            <%= link_to @artist.official_link, @artist.official_link, target: "_blank", rel: "noopener", class: "text-sky-600 hover:text-sky-500" %>
+          <% if (official_url = safe_external_url(@artist.official_link)) %>
+            <%= link_to official_url, official_url, target: "_blank", rel: "noopener", class: "text-sky-600 hover:text-sky-500" %>
           <% else %>
-            <span class="text-slate-400">-</span>
+            <span class="text-slate-400"><%= @artist.official_link.presence || "-" %></span>
           <% end %>
         </dd>
       </div>
@@ -54,7 +54,11 @@
           <% if @artist.social_links.any? %>
             <% @artist.social_links.each do |link| %>
               <div>
-                <%= link_to(link.url, link.url, target: "_blank", rel: "noopener", class: "text-sky-600 hover:text-sky-500") %>
+                <% if (url = safe_external_url(link.url)) %>
+                  <%= link_to(url, url, target: "_blank", rel: "noopener", class: "text-sky-600 hover:text-sky-500") %>
+                <% else %>
+                  <span class="text-slate-400"><%= link.url.presence || "URL未設定" %></span>
+                <% end %>
                 <% if link.label.present? %>
                   <span class="ml-2 text-xs text-slate-500">(<%= link.label %>)</span>
                 <% end %>
