@@ -16,7 +16,7 @@ Rails.application.routes.draw do
       get :edit_timetable
       patch :update_timetable
       post :publish
-      patch :apply_discounts
+      match :apply_discounts, via: %i[patch post]
     end
 
     resources :timetable_slots, except: :index

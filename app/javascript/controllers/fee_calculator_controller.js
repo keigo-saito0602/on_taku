@@ -11,6 +11,6 @@ export default class extends Controller {
     const eventFee = parseInt(this.eventFeeTarget.value || "0", 10)
     const drinkFee = parseInt(this.drinkFeeTarget.value || "0", 10)
     const total = eventFee + drinkFee
-    this.totalTarget.textContent = total.toLocaleString()
+    this.totalTarget.textContent = total === 0 ? "無料" : `${total.toLocaleString()} 円`
   }
 }

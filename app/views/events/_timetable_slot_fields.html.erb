@@ -1,5 +1,5 @@
 <% slot = f.object %>
-<% slot_type = slot.changeover? ? "changeover" : (slot.artist.present? ? "performance" : "other") %>
+<% slot_type = slot.slot_kind.presence || (slot.changeover? ? "changeover" : "performance") %>
 <% color_classes = case slot_type
   when "changeover" then "bg-amber-50 border-amber-200"
   when "other" then "bg-slate-100 border-slate-200"
@@ -8,11 +8,18 @@ end %>
 
 <% slot_classes = ["rounded-xl border p-4 shadow-sm transition", color_classes] %>
 <% slot_classes << "slot-hidden" if slot.marked_for_destruction? %>
+<% label_text =
+     case slot_type
+     when "changeover" then "転換"
+     when "other" then "その他"
+     else "出演"
+     end %>
+
 <div class="<%= slot_classes.join(" ") %>" data-timetable-editor-target="slot" data-slot-id="<%= slot.id || '' %>" data-slot-type="<%= slot_type %>" data-original-type="<%= slot_type %>">
   <div class="flex items-center justify-between gap-3 border-b border-slate-100 pb-3">
     <div class="flex items-center gap-2 text-sm font-semibold text-slate-700">
       <span class="drag-handle cursor-move text-slate-400" data-action="timetable-editor#handleDrag">☰</span>
-      <span class="slot-label"><%= slot.changeover? ? "転換" : "出演" %></span>
+      <span class="slot-label"><%= label_text %></span>
     </div>
     <div class="flex flex-wrap items-center gap-3 text-xs font-semibold">
       <button type="button" class="text-slate-500 hover:text-slate-700" data-action="timetable-editor#setPerformance">出演枠に変更</button>
@@ -26,6 +33,8 @@ end %>
     <%= f.hidden_field :id %>
     <%= f.hidden_field :position, value: slot.position, data: { timetable_editor_target: "position" } %>
     <%= f.hidden_field :changeover, value: slot.changeover?, data: { timetable_editor_target: "changeover" } %>
+    <%= f.hidden_field :slot_kind, value: slot_type, data: { timetable_editor_target: "kind" } %>
+    <%= f.hidden_field :stage_name, value: slot.stage_name, data: { timetable_editor_target: "stage" } %>
     <%= f.hidden_field :_destroy, value: false, data: { timetable_editor_target: "destroy" } %>
 
     <div>

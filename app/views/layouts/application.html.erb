@@ -43,8 +43,15 @@
       </nav>
     </header>
 
+    <% if flash[:alert_dialog].present? %>
+      <div data-controller="flash-dialog"
+           data-flash-dialog-title-value="<%= j(flash[:alert_dialog_title].presence || '公開できません') %>"
+           data-flash-dialog-message-value="<%= j(flash[:alert_dialog]) %>"></div>
+    <% end %>
+
     <main class="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8">
       <% flash.each do |type, message| %>
+        <% next if type.to_s.in?(%w[alert_dialog alert_dialog_title]) %>
         <% tone = type.to_s.in?(%w[notice success]) ? "bg-emerald-50 text-emerald-800 border border-emerald-200" : "bg-rose-50 text-rose-800 border border-rose-200" %>
         <div class="rounded-lg px-4 py-3 text-sm font-medium <%= tone %>">
           <%= message %>

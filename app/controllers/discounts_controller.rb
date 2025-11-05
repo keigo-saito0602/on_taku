@@ -1,6 +1,6 @@
 class DiscountsController < ApplicationController
   before_action :require_organizer!
-  before_action :set_discount, only: %i[edit update destroy]
+  before_action :set_discount, only: %i[show edit update destroy]
 
   def index
     @discounts = Discount.ordered
@@ -24,7 +24,7 @@ class DiscountsController < ApplicationController
 
   def update
     if @discount.update(discount_params)
-      redirect_to discounts_path, success: "割引を更新しました"
+      redirect_to discount_path(@discount), success: "割引を更新しました"
     else
       render :edit, status: :unprocessable_entity
     end
@@ -49,3 +49,4 @@ class DiscountsController < ApplicationController
     Discount.maximum(:priority).to_i + 1
   end
 end
+  def show; end

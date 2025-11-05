@@ -2,20 +2,22 @@ class TimetableSlot < ApplicationRecord
   SLOT_INCREMENT_MINUTES = 5
   PERFORMANCE_TEMPLATES = [20, 30, 45, 60, 90].freeze
   CHANGEOVER_TEMPLATES = [5, 10, 15].freeze
+  SLOT_KINDS = %w[performance changeover other].freeze
 
   belongs_to :event
   belongs_to :event_timetable, inverse_of: :timetable_slots
   belongs_to :artist, optional: true
 
   validates :start_time, :end_time, presence: true
+  validates :slot_kind, inclusion: { in: SLOT_KINDS }
   validate :end_after_start
   validate :time_on_grid
   validate :slot_in_increment
   validate :no_overlap
-  validates :artist, presence: true, unless: :allow_blank_artist?
 
   before_validation :ensure_position
   before_validation :sync_event_with_timetable
+  before_validation :normalize_slot_kind
 
   private
 
@@ -38,7 +40,7 @@ class TimetableSlot < ApplicationRecord
   def no_overlap
     return if event.blank? || start_time.blank? || end_time.blank?
 
-    timetable = event_timetable || event&.event_timetables&.first
+    timetable = event_timetable
     return if timetable.blank?
 
     conflict = timetable.timetable_slots.reject do |slot|
@@ -80,18 +82,17 @@ class TimetableSlot < ApplicationRecord
     self.position = siblings.count + 1
   end
 
-  def allow_blank_artist?
-    changeover? || other_slot?
-  end
-
-  def other_slot?
-    changeover? == false && artist_id.blank? && stage_name.present?
-  end
-
   def sync_event_with_timetable
     return if event_timetable.blank?
 
     self.event_id = event_timetable.event_id
     self.stage_name = event_timetable.stage_name if event_timetable.stage_name.present?
   end
+
+  def normalize_slot_kind
+    self.slot_kind = "changeover" if changeover?
+    self.slot_kind = artist_id.present? ? "performance" : "other" if slot_kind.blank?
+    self.changeover = (slot_kind == "changeover")
+  end
+
 end

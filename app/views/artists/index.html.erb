@@ -34,8 +34,8 @@
           <td class="px-4 py-3 text-right text-xs font-semibold text-slate-500">
             <% if current_user&.organizer? %>
               <div class="flex justify-end gap-3">
+                <%= link_to "詳細", artist, class: "text-slate-500 hover:text-slate-700" %>
                 <%= link_to "編集", edit_artist_path(artist), class: "text-sky-600 hover:text-sky-500" %>
-                <%= link_to "削除", artist, data: { turbo_confirm: "削除しますか？" }, method: :delete, class: "text-rose-600 hover:text-rose-500" %>
               </div>
             <% else %>
               <span class="text-slate-300">-</span>

@@ -19,7 +19,8 @@ export default class extends Controller {
     "changeoverInput",
     "stageStart",
     "stageEnd",
-    "stageDestroy"
+    "stageDestroy",
+    "kind"
   ]
 
   static values = {
@@ -110,13 +111,15 @@ export default class extends Controller {
 
   artistUpdated(event) {
     const card = event.target.closest("[data-timetable-editor-target='slot']")
+    if (!card) return
     if (event.target.value) {
       this.applySlotType(card, "performance", { keepArtist: true })
-    } else if (!card.classList.contains("slot-hidden")) {
-      const fallback = card.dataset.originalType || "other"
-      const type = fallback === "changeover" ? "performance" : fallback
-      this.applySlotType(card, type, { keepArtist: false })
+      return
     }
+    if (card.classList.contains("slot-hidden")) return
+    const kindInput = card.querySelector("input[data-timetable-editor-target='kind']")
+    const fallback = kindInput?.value || card.dataset.originalType || "performance"
+    this.applySlotType(card, fallback, { keepArtist: false })
   }
 
   applySlotType(card, type, { keepArtist = false } = {}) {
@@ -124,10 +127,15 @@ export default class extends Controller {
     const changeoverInput = card.querySelector("input[data-timetable-editor-target='changeover']")
     const artistSelect = card.querySelector("select[data-timetable-editor-target='artist']")
     const label = card.querySelector(".slot-label")
+    const kindInput = card.querySelector("input[data-timetable-editor-target='kind']")
 
-    switch (type) {
+    const normalized = ["performance", "changeover", "other"].includes(type) ? type : "performance"
+
+    if (kindInput) kindInput.value = normalized
+    if (changeoverInput) changeoverInput.value = normalized === "changeover" ? "true" : "false"
+
+    switch (normalized) {
       case "changeover":
-        changeoverInput.value = true
         if (artistSelect) {
           artistSelect.value = ""
           artistSelect.disabled = true
@@ -137,19 +145,22 @@ export default class extends Controller {
         card.dataset.originalType = "changeover"
         break
       case "other":
-        changeoverInput.value = false
-        if (artistSelect) artistSelect.disabled = false
-        if (!keepArtist && artistSelect) artistSelect.value = ""
+        if (artistSelect) {
+          artistSelect.disabled = false
+          if (!keepArtist) artistSelect.value = ""
+        }
         label.textContent = "その他"
         card.dataset.slotType = "other"
         card.dataset.originalType = "other"
         break
       default:
-        changeoverInput.value = false
-        if (artistSelect) artistSelect.disabled = false
+        if (artistSelect) {
+          artistSelect.disabled = false
+          if (!keepArtist && !artistSelect.value) artistSelect.value = ""
+        }
         label.textContent = "出演"
         card.dataset.slotType = "performance"
-        card.dataset.originalType = "performance"
+        card.dataset.originalType = card.dataset.originalType || "performance"
         break
     }
 
@@ -307,6 +318,8 @@ export default class extends Controller {
     if (changeoverInput && changeoverInput.value === "true") {
       return "changeover"
     }
+    const kindInput = card.querySelector("input[data-timetable-editor-target='kind']")
+    if (kindInput && kindInput.value) return kindInput.value
     return card.dataset.slotType || "performance"
   }
 
