@@ -14,9 +14,8 @@
 <% else %>
   <% window_start, window_end = timeline_window(slots) %>
   <% total_minutes = [window_end - window_start, 60].max %>
-  <% scale = 4.0 %>
-  <% padding = 24 %>
-  <% chart_height = total_minutes * scale + padding * 2 %>
+  <% scale = 3.2 %>
+  <% chart_height = total_minutes * scale %>
 
   <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
     <div class="flex items-center justify-between pb-4">
@@ -28,7 +27,7 @@
     <div class="relative">
       <div class="absolute left-0 top-0 w-16" style="height: <%= chart_height %>px;">
         <% (window_start..window_end).step(60) do |minute| %>
-          <% y = padding + (minute - window_start) * scale %>
+          <% y = (minute - window_start) * scale %>
           <div class="absolute left-0 right-0 border-t border-dashed border-slate-200 text-[11px] text-slate-400" style="top: <%= y %>px;">
             <span class="pl-1 align-top"><%= format("%02d:00", minute / 60) %></span>
           </div>
@@ -39,8 +38,8 @@
           <% start_minutes = minutes_since_midnight(slot.start_time) %>
           <% end_minutes = minutes_since_midnight(slot.end_time) %>
           <% duration = [end_minutes - start_minutes, 5].max %>
-          <% top = padding + (start_minutes - window_start) * scale %>
-          <% height = [duration * scale, 56].max %>
+          <% top = (start_minutes - window_start) * scale %>
+          <% height = [duration * scale, 48].max %>
           <% label, color = slot_label_and_color(slot) %>
           <div class="absolute left-4 right-4 rounded-xl border px-4 py-3 text-sm shadow-sm transition hover:shadow bg-white"
                style="top: <%= top %>px; height: <%= height %>px;">

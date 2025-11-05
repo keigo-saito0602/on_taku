@@ -30,7 +30,8 @@ export default class extends Controller {
     templates: Array,
     changeoverTemplates: Array,
     scale: { type: Number, default: 2.4 },
-    padding: { type: Number, default: 24 }
+    padding: { type: Number, default: 24 },
+    variant: { type: String, default: "timeline" }
   }
 
   connect() {
@@ -40,13 +41,13 @@ export default class extends Controller {
       onEnd: () => {
         this.updatePositions()
         this.updateDeleteButtons()
-        this.refreshTimeline()
+        if (this.variantValue === "timeline") this.refreshTimeline()
       }
     })
     this.updatePositions()
     this.refreshSlotStyles()
     this.updateDeleteButtons()
-    this.refreshTimeline()
+    if (this.variantValue === "timeline") this.refreshTimeline()
   }
 
   disconnect() {
@@ -70,7 +71,7 @@ export default class extends Controller {
     this.listTarget.appendChild(card)
     this.updatePositions()
     this.updateDeleteButtons()
-    this.refreshTimeline()
+    if (this.variantValue === "timeline") this.refreshTimeline()
     card.scrollIntoView({ behavior: "smooth", block: "center" })
   }
 
@@ -86,7 +87,7 @@ export default class extends Controller {
     }
     this.updatePositions()
     this.updateDeleteButtons()
-    this.refreshTimeline()
+    if (this.variantValue === "timeline") this.refreshTimeline()
   }
 
   removeStage(event) {
@@ -101,7 +102,7 @@ export default class extends Controller {
     this.element.classList.add("stage-hidden")
     this.updatePositions()
     this.updateDeleteButtons()
-    this.refreshTimeline()
+    if (this.variantValue === "timeline") this.refreshTimeline()
   }
 
   setPerformance(event) {
@@ -177,7 +178,7 @@ export default class extends Controller {
     }
 
     this.applySlotStyle(card)
-    this.refreshTimeline()
+    if (this.variantValue === "timeline") this.refreshTimeline()
   }
 
   applyTemplates() {
@@ -207,7 +208,7 @@ export default class extends Controller {
       current += duration
       endInput.value = this.formatMinutes(current)
     })
-    this.refreshTimeline()
+    if (this.variantValue === "timeline") this.refreshTimeline()
   }
 
   distributeEvenly() {
@@ -268,7 +269,7 @@ export default class extends Controller {
       endInput.value = this.formatMinutes(endValue)
       current = endValue
     })
-    this.refreshTimeline()
+    if (this.variantValue === "timeline") this.refreshTimeline()
   }
 
   updatePositions() {
@@ -316,7 +317,7 @@ export default class extends Controller {
       if (this.isHidden(slot)) return
       this.applySlotStyle(slot)
     })
-    this.refreshTimeline()
+    if (this.variantValue === "timeline") this.refreshTimeline()
   }
 
   applySlotStyle(card) {
@@ -417,33 +418,39 @@ export default class extends Controller {
   }
 
   refreshTimeline() {
+    if (this.variantValue !== "timeline") return
     const canvas = this.canvasTargets?.[0]
     if (!canvas) return
 
     const slots = this.slots().filter((slot) => !this.isHidden(slot))
-    if (slots.length === 0) {
-      const padding = this.paddingValue
-      const fallbackHeight = 300
-      canvas.style.height = `${fallbackHeight}px`
-      canvas.dataset.startMinutes = (17 * 60).toString()
-      canvas.dataset.endMinutes = (22 * 60).toString()
-      canvas.dataset.padding = padding
-      this.renderHourGuide(canvas)
-      return
+    const explicitStart = this.parseMinutes(this.stageStartTarget?.value)
+    const explicitEnd = this.parseMinutes(this.stageEndTarget?.value)
+
+    let startMinutes = slots
+      .map((slot) => this.parseMinutes(this.getInput(slot, "start").value))
+      .filter((value) => value !== null)
+    startMinutes = startMinutes.length > 0 ? Math.min(...startMinutes) : null
+
+    let endMinutes = slots
+      .map((slot) => this.parseMinutes(this.getInput(slot, "end").value))
+      .filter((value) => value !== null)
+    endMinutes = endMinutes.length > 0 ? Math.max(...endMinutes) : null
+
+    if (explicitStart !== null) {
+      startMinutes = startMinutes === null ? explicitStart : Math.min(startMinutes, explicitStart)
+    }
+    if (explicitEnd !== null) {
+      endMinutes = endMinutes === null ? explicitEnd : Math.max(endMinutes, explicitEnd)
     }
 
-    const startMinutes = Math.min(
-      ...slots.map((slot) => this.parseMinutes(this.getInput(slot, "start").value) ?? 0)
-    )
-    const endMinutes = Math.max(
-      ...slots.map((slot) => this.parseMinutes(this.getInput(slot, "end").value) ?? 0)
-    )
+    if (startMinutes === null) startMinutes = explicitStart ?? 18 * 60
+    if (endMinutes === null) endMinutes = Math.max(startMinutes + 60, explicitEnd || startMinutes + 60)
 
-    const buffer = 30
-    const origin = Math.max(0, Math.floor(((startMinutes || 0) - buffer) / SLOT_INCREMENT_MINUTES) * SLOT_INCREMENT_MINUTES)
-    const limit = Math.min(24 * 60, Math.ceil(((endMinutes || 24 * 60) + buffer) / SLOT_INCREMENT_MINUTES) * SLOT_INCREMENT_MINUTES)
+    const buffer = 20
+    const origin = Math.max(0, Math.floor((startMinutes - buffer) / SLOT_INCREMENT_MINUTES) * SLOT_INCREMENT_MINUTES)
+    const limit = Math.min(24 * 60, Math.ceil((endMinutes + buffer) / SLOT_INCREMENT_MINUTES) * SLOT_INCREMENT_MINUTES)
     const totalMinutes = Math.max(limit - origin, 60)
-    const padding = Math.max(this.paddingValue, 40)
+    const padding = Math.max(this.paddingValue, 48)
     const canvasHeight = totalMinutes * this.scaleValue + padding * 2
     canvas.style.height = `${canvasHeight}px`
     canvas.dataset.startMinutes = origin
@@ -455,6 +462,7 @@ export default class extends Controller {
   }
 
   renderHourGuide(canvas) {
+    if (this.variantValue !== "timeline") return
     const guide = this.hourGuideTargets?.[0]
     if (!guide) return
 
@@ -476,6 +484,7 @@ export default class extends Controller {
   }
 
   positionSlot(slot, origin, paddingOverride = null) {
+    if (this.variantValue !== "timeline") return
     const startInput = this.getInput(slot, "start")
     const endInput = this.getInput(slot, "end")
     if (!startInput || !endInput) return
@@ -485,8 +494,11 @@ export default class extends Controller {
     if (start === null || end === null || end <= start) return
 
     const padding = paddingOverride !== null ? paddingOverride : Number(slot.closest("[data-timetable-editor-target='canvas']")?.dataset.padding || this.paddingValue)
-    const top = padding + (start - origin) * this.scaleValue
-    const height = Math.max((end - start) * this.scaleValue, 48)
+    const gap = 12
+    const positionInput = slot.querySelector("input[data-timetable-editor-target='position']")
+    const orderIndex = positionInput ? Number(positionInput.value) - 1 : 0
+    const top = padding + (start - origin) * this.scaleValue + orderIndex * gap
+    const height = Math.max((end - start) * this.scaleValue - gap, 72)
 
     slot.style.position = "absolute"
     slot.style.top = `${top}px`

@@ -5,7 +5,7 @@
   <div class="flex flex-col gap-4" data-controller="timetable-editor"
        data-timetable-editor-templates-value="<%= TimetableSlot::PERFORMANCE_TEMPLATES.to_json %>"
        data-timetable-editor-changeover-templates-value="<%= TimetableSlot::CHANGEOVER_TEMPLATES.to_json %>"
-       data-timetable-editor-scale-value="2.4">
+       data-timetable-editor-variant-value="simple">
     <%= f.hidden_field :id %>
     <%= f.hidden_field :position, value: timetable.position, data: { role: "stage-position" } %>
     <%= f.hidden_field :_destroy, value: false, data: { timetable_editor_target: "stageDestroy" } %>
@@ -27,17 +27,12 @@
 
     <div class="grid gap-4 lg:grid-cols-[minmax(0,2.2fr)_minmax(320px,1fr)]">
       <div class="rounded-xl border border-slate-200 bg-white p-4">
-        <div class="relative">
-          <div class="timetable-hour-guide pointer-events-none absolute inset-y-0 left-0 w-16" data-timetable-editor-target="hourGuide"></div>
-          <div class="timetable-canvas ml-16 overflow-hidden rounded-xl border border-slate-200 bg-slate-50" data-timetable-editor-target="canvas">
-            <div class="relative min-h-[360px] h-full" data-timetable-editor-target="list">
-              <% timetable.timetable_slots.each do |slot| %>
-                <%= f.fields_for :timetable_slots, slot do |slot_fields| %>
-                  <%= render "events/timetable_slot_fields", f: slot_fields, artists: artists %>
-                <% end %>
-              <% end %>
-            </div>
-          </div>
+        <div class="space-y-4" data-timetable-editor-target="list">
+          <% timetable.timetable_slots.each do |slot| %>
+            <%= f.fields_for :timetable_slots, slot do |slot_fields| %>
+              <%= render "events/timetable_slot_fields", f: slot_fields, artists: artists %>
+            <% end %>
+          <% end %>
         </div>
       </div>
 
