@@ -2,8 +2,29 @@
 
 <div class="space-y-3">
   <h1 class="text-2xl font-semibold text-slate-900">タイムテーブル編集</h1>
-  <p class="text-sm text-slate-500">ステージごとにタイムテーブルを作成し、枠をドラッグ&ドロップで並べ替えできます。</p>
+  <p class="text-sm text-slate-500">Googleカレンダーのようなタイムチャート上で枠を確認しつつ、必要な情報を入力・調整できます。</p>
 </div>
+
+<% if @event.errors.any? || @event.event_timetables.any? { |t| t.errors.any? || t.timetable_slots.any? { |slot| slot.errors.any? } } %>
+  <div class="mt-4 rounded-xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700 shadow-sm">
+    <p class="font-semibold">入力内容を確認してください。</p>
+    <ul class="mt-2 list-disc space-y-1 pl-5">
+      <% @event.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      <% @event.event_timetables.each do |timetable| %>
+        <% timetable.errors.full_messages.each do |message| %>
+          <li><%= "#{timetable.stage_name.presence || 'ステージ'}: #{message}" %></li>
+        <% end %>
+        <% timetable.timetable_slots.each do |slot| %>
+          <% slot.errors.full_messages.each do |message| %>
+            <li><%= "#{timetable.stage_name.presence || 'ステージ'} / #{slot.start_time&.strftime('%H:%M') || '未設定'}枠: #{message}" %></li>
+          <% end %>
+        <% end %>
+      <% end %>
+    </ul>
+  </div>
+<% end %>
 
 <%= form_with model: @event, url: update_timetable_event_path(@event), method: :patch, data: { controller: "timetable-stages" }, html: { class: "mt-6 space-y-6" } do |form| %>
   <div class="space-y-6" data-timetable-stages-target="container">

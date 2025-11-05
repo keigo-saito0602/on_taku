@@ -126,6 +126,7 @@ class EventsController < ApplicationController
           :changeover,
           :slot_kind,
           :stage_name,
+          :note,
           :position,
           :_destroy
         ]

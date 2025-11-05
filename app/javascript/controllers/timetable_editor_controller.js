@@ -20,12 +20,17 @@ export default class extends Controller {
     "stageStart",
     "stageEnd",
     "stageDestroy",
-    "kind"
+    "kind",
+    "artistField",
+    "canvas",
+    "hourGuide"
   ]
 
   static values = {
     templates: Array,
-    changeoverTemplates: Array
+    changeoverTemplates: Array,
+    scale: { type: Number, default: 2.4 },
+    padding: { type: Number, default: 24 }
   }
 
   connect() {
@@ -35,11 +40,13 @@ export default class extends Controller {
       onEnd: () => {
         this.updatePositions()
         this.updateDeleteButtons()
+        this.refreshTimeline()
       }
     })
     this.updatePositions()
     this.refreshSlotStyles()
     this.updateDeleteButtons()
+    this.refreshTimeline()
   }
 
   disconnect() {
@@ -63,6 +70,7 @@ export default class extends Controller {
     this.listTarget.appendChild(card)
     this.updatePositions()
     this.updateDeleteButtons()
+    this.refreshTimeline()
     card.scrollIntoView({ behavior: "smooth", block: "center" })
   }
 
@@ -78,6 +86,7 @@ export default class extends Controller {
     }
     this.updatePositions()
     this.updateDeleteButtons()
+    this.refreshTimeline()
   }
 
   removeStage(event) {
@@ -92,6 +101,7 @@ export default class extends Controller {
     this.element.classList.add("stage-hidden")
     this.updatePositions()
     this.updateDeleteButtons()
+    this.refreshTimeline()
   }
 
   setPerformance(event) {
@@ -128,7 +138,6 @@ export default class extends Controller {
     const artistSelect = card.querySelector("select[data-timetable-editor-target='artist']")
     const label = card.querySelector(".slot-label")
     const kindInput = card.querySelector("input[data-timetable-editor-target='kind']")
-
     const normalized = ["performance", "changeover", "other"].includes(type) ? type : "performance"
 
     if (kindInput) kindInput.value = normalized
@@ -140,11 +149,13 @@ export default class extends Controller {
           artistSelect.value = ""
           artistSelect.disabled = true
         }
+        this.toggleArtistField(card, false)
         label.textContent = "転換"
         card.dataset.slotType = "changeover"
         card.dataset.originalType = "changeover"
         break
       case "other":
+        this.toggleArtistField(card, true)
         if (artistSelect) {
           artistSelect.disabled = false
           if (!keepArtist) artistSelect.value = ""
@@ -154,6 +165,7 @@ export default class extends Controller {
         card.dataset.originalType = "other"
         break
       default:
+        this.toggleArtistField(card, true)
         if (artistSelect) {
           artistSelect.disabled = false
           if (!keepArtist && !artistSelect.value) artistSelect.value = ""
@@ -165,6 +177,7 @@ export default class extends Controller {
     }
 
     this.applySlotStyle(card)
+    this.refreshTimeline()
   }
 
   applyTemplates() {
@@ -194,6 +207,7 @@ export default class extends Controller {
       current += duration
       endInput.value = this.formatMinutes(current)
     })
+    this.refreshTimeline()
   }
 
   distributeEvenly() {
@@ -254,6 +268,7 @@ export default class extends Controller {
       endInput.value = this.formatMinutes(endValue)
       current = endValue
     })
+    this.refreshTimeline()
   }
 
   updatePositions() {
@@ -301,6 +316,7 @@ export default class extends Controller {
       if (this.isHidden(slot)) return
       this.applySlotStyle(slot)
     })
+    this.refreshTimeline()
   }
 
   applySlotStyle(card) {
@@ -310,6 +326,7 @@ export default class extends Controller {
     card.classList.remove(...ALL_TYPE_CLASSES)
     const classes = TYPE_CLASSES[type] || TYPE_CLASSES.performance
     card.classList.add(...classes)
+    this.toggleArtistField(card, type !== "changeover")
   }
 
   resolveSlotType(card) {
@@ -391,5 +408,90 @@ export default class extends Controller {
 
   slots() {
     return Array.from(this.listTarget.querySelectorAll("[data-timetable-editor-target='slot']"))
+  }
+
+  toggleArtistField(card, visible) {
+    const artistField = card.querySelector("[data-timetable-editor-target='artistField']")
+    if (!artistField) return
+    artistField.classList.toggle("hidden", !visible)
+  }
+
+  refreshTimeline() {
+    const canvas = this.canvasTargets?.[0]
+    if (!canvas) return
+
+    const slots = this.slots().filter((slot) => !this.isHidden(slot))
+    if (slots.length === 0) {
+      const padding = this.paddingValue
+      const fallbackHeight = 300
+      canvas.style.height = `${fallbackHeight}px`
+      canvas.dataset.startMinutes = (17 * 60).toString()
+      canvas.dataset.endMinutes = (22 * 60).toString()
+      canvas.dataset.padding = padding
+      this.renderHourGuide(canvas)
+      return
+    }
+
+    const startMinutes = Math.min(
+      ...slots.map((slot) => this.parseMinutes(this.getInput(slot, "start").value) ?? 0)
+    )
+    const endMinutes = Math.max(
+      ...slots.map((slot) => this.parseMinutes(this.getInput(slot, "end").value) ?? 0)
+    )
+
+    const buffer = 30
+    const origin = Math.max(0, Math.floor(((startMinutes || 0) - buffer) / SLOT_INCREMENT_MINUTES) * SLOT_INCREMENT_MINUTES)
+    const limit = Math.min(24 * 60, Math.ceil(((endMinutes || 24 * 60) + buffer) / SLOT_INCREMENT_MINUTES) * SLOT_INCREMENT_MINUTES)
+    const totalMinutes = Math.max(limit - origin, 60)
+    const padding = this.paddingValue
+    const canvasHeight = totalMinutes * this.scaleValue + padding * 2
+    canvas.style.height = `${canvasHeight}px`
+    canvas.dataset.startMinutes = origin
+    canvas.dataset.endMinutes = limit
+    canvas.dataset.padding = padding
+
+    this.renderHourGuide(canvas)
+    slots.forEach((slot) => this.positionSlot(slot, origin))
+  }
+
+  renderHourGuide(canvas) {
+    const guide = this.hourGuideTargets?.[0]
+    if (!guide) return
+
+    guide.innerHTML = ""
+    guide.style.height = canvas.style.height
+    const start = Number(canvas.dataset.startMinutes || 0)
+    const end = Number(canvas.dataset.endMinutes || 24 * 60)
+    const padding = Number(canvas.dataset.padding || this.paddingValue)
+    const hourStart = Math.floor(start / 60)
+    const hourEnd = Math.ceil(end / 60)
+    for (let hour = hourStart; hour <= hourEnd; hour += 1) {
+      const y = padding + (hour * 60 - start) * this.scaleValue
+      const mark = document.createElement("div")
+      mark.className = "absolute left-0 right-0 border-t border-dashed border-slate-200 text-[10px] text-slate-400 pl-1"
+      mark.style.top = `${y}px`
+      mark.textContent = `${hour.toString().padStart(2, "0")}:00`
+      guide.appendChild(mark)
+    }
+  }
+
+  positionSlot(slot, origin) {
+    const startInput = this.getInput(slot, "start")
+    const endInput = this.getInput(slot, "end")
+    if (!startInput || !endInput) return
+
+    const start = this.parseMinutes(startInput.value)
+    const end = this.parseMinutes(endInput.value)
+    if (start === null || end === null || end <= start) return
+
+    const padding = Number(slot.closest("[data-timetable-editor-target='canvas']")?.dataset.padding || this.paddingValue)
+    const top = padding + (start - origin) * this.scaleValue
+    const height = Math.max((end - start) * this.scaleValue, 48)
+
+    slot.style.position = "absolute"
+    slot.style.top = `${top}px`
+    slot.style.left = "0.75rem"
+    slot.style.right = "0.75rem"
+    slot.style.height = `${height}px`
   }
 }

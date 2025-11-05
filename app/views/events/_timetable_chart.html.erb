@@ -1,0 +1,67 @@
+<% slots = timetable.timetable_slots.includes(:artist).order(:start_time) %>
+<% if slots.blank? %>
+  <div class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-sm text-slate-500">
+    <div class="flex items-center justify-between">
+      <div>
+        <h3 class="text-base font-semibold text-slate-700"><%= timetable.stage_name %></h3>
+        <p class="mt-1 text-xs">タイムテーブルが登録されていません。</p>
+      </div>
+      <% if defined?(show_edit) && show_edit %>
+        <%= link_to "タイムテーブルを編集", edit_timetable_event_path(@event), class: "text-xs font-semibold text-sky-600 hover:text-sky-500" %>
+      <% end %>
+    </div>
+  </div>
+<% else %>
+  <% window_start, window_end = timeline_window(slots) %>
+  <% total_minutes = [window_end - window_start, 60].max %>
+  <% scale = 4.0 %>
+  <% padding = 24 %>
+  <% chart_height = total_minutes * scale + padding * 2 %>
+
+  <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+    <div class="flex items-center justify-between pb-4">
+      <h3 class="text-base font-semibold text-slate-800"><%= timetable.stage_name %></h3>
+      <% if defined?(show_edit) && show_edit %>
+        <%= link_to "タイムテーブルを編集", edit_timetable_event_path(@event), class: "text-xs font-semibold text-sky-600 hover:text-sky-500" %>
+      <% end %>
+    </div>
+    <div class="relative">
+      <div class="absolute left-0 top-0 w-16" style="height: <%= chart_height %>px;">
+        <% (window_start..window_end).step(60) do |minute| %>
+          <% y = padding + (minute - window_start) * scale %>
+          <div class="absolute left-0 right-0 border-t border-dashed border-slate-200 text-[11px] text-slate-400" style="top: <%= y %>px;">
+            <span class="pl-1 align-top"><%= format("%02d:00", minute / 60) %></span>
+          </div>
+        <% end %>
+      </div>
+      <div class="relative ml-16 overflow-hidden rounded-xl border border-slate-200 bg-slate-50" style="height: <%= chart_height %>px;">
+        <% slots.each do |slot| %>
+          <% start_minutes = minutes_since_midnight(slot.start_time) %>
+          <% end_minutes = minutes_since_midnight(slot.end_time) %>
+          <% duration = [end_minutes - start_minutes, 5].max %>
+          <% top = padding + (start_minutes - window_start) * scale %>
+          <% height = [duration * scale, 56].max %>
+          <% label, color = slot_label_and_color(slot) %>
+          <div class="absolute left-4 right-4 rounded-xl border px-4 py-3 text-sm shadow-sm transition hover:shadow bg-white"
+               style="top: <%= top %>px; height: <%= height %>px;">
+            <div class="flex items-center justify-between text-xs font-semibold">
+              <span class="inline-flex items-center gap-2">
+                <span class="rounded-full px-2 py-0.5 text-[11px] font-semibold <%= color %>"><%= label %></span>
+                <span class="font-mono text-slate-500"><%= slot.start_time.strftime("%H:%M") %> - <%= slot.end_time.strftime("%H:%M") %></span>
+              </span>
+              <% if slot.artist %>
+                <span class="text-slate-600"><%= slot.artist.name %></span>
+              <% end %>
+            </div>
+            <% if slot.note.present? %>
+              <p class="mt-2 text-xs leading-relaxed text-slate-600"><%= slot.note %></p>
+            <% end %>
+            <% if !slot.changeover? && slot.artist.blank? %>
+              <p class="mt-2 text-xs font-semibold text-rose-600">出演者未定</p>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+<% end %>
