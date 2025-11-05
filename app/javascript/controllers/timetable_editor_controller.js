@@ -443,7 +443,7 @@ export default class extends Controller {
     const origin = Math.max(0, Math.floor(((startMinutes || 0) - buffer) / SLOT_INCREMENT_MINUTES) * SLOT_INCREMENT_MINUTES)
     const limit = Math.min(24 * 60, Math.ceil(((endMinutes || 24 * 60) + buffer) / SLOT_INCREMENT_MINUTES) * SLOT_INCREMENT_MINUTES)
     const totalMinutes = Math.max(limit - origin, 60)
-    const padding = this.paddingValue
+    const padding = Math.max(this.paddingValue, 40)
     const canvasHeight = totalMinutes * this.scaleValue + padding * 2
     canvas.style.height = `${canvasHeight}px`
     canvas.dataset.startMinutes = origin
@@ -451,7 +451,7 @@ export default class extends Controller {
     canvas.dataset.padding = padding
 
     this.renderHourGuide(canvas)
-    slots.forEach((slot) => this.positionSlot(slot, origin))
+    slots.forEach((slot) => this.positionSlot(slot, origin, padding))
   }
 
   renderHourGuide(canvas) {
@@ -475,7 +475,7 @@ export default class extends Controller {
     }
   }
 
-  positionSlot(slot, origin) {
+  positionSlot(slot, origin, paddingOverride = null) {
     const startInput = this.getInput(slot, "start")
     const endInput = this.getInput(slot, "end")
     if (!startInput || !endInput) return
@@ -484,7 +484,7 @@ export default class extends Controller {
     const end = this.parseMinutes(endInput.value)
     if (start === null || end === null || end <= start) return
 
-    const padding = Number(slot.closest("[data-timetable-editor-target='canvas']")?.dataset.padding || this.paddingValue)
+    const padding = paddingOverride !== null ? paddingOverride : Number(slot.closest("[data-timetable-editor-target='canvas']")?.dataset.padding || this.paddingValue)
     const top = padding + (start - origin) * this.scaleValue
     const height = Math.max((end - start) * this.scaleValue, 48)
 
