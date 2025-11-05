@@ -9,6 +9,6 @@ class CreateEventTimetables < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    add_index :event_timetables, [:event_id, :position]
+    add_index :event_timetables, [ :event_id, :position ]
   end
 end

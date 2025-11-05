@@ -22,7 +22,7 @@ class Discount < ApplicationRecord
     when "percentage"
       (amount * (100 - value) / 100.0).floor
     when "fixed"
-      [amount - value, 0].max
+      [ amount - value, 0 ].max
     else
       amount
     end

@@ -12,7 +12,7 @@ class EvaluationMemo < ApplicationRecord
     csv_rows = CSV.parse(raw, headers: true)
     headers = csv_rows.headers.compact
     raise CSV::MalformedCSVError.new("CSVにヘッダー行がありません", nil) if headers.empty?
-    required_headers = ["実績/補足"]
+    required_headers = [ "実績/補足" ]
     unless (headers & required_headers).any?
       raise CSV::MalformedCSVError.new("必須ヘッダー(#{required_headers.join(', ')})が見つかりません", nil)
     end

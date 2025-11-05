@@ -51,7 +51,7 @@ class EventsController < ApplicationController
       redirect_to @event, success: "イベントを公開しました"
     else
       load_show_context
-      message_lines = ["公開に必要な情報が不足しています。", *@event.errors.full_messages]
+      message_lines = [ "公開に必要な情報が不足しています。", *@event.errors.full_messages ]
       flash.now[:alert] = message_lines.join(" ")
       flash.now[:alert_dialog_title] = "公開できません"
       flash.now[:alert_dialog] = message_lines.join("\n")

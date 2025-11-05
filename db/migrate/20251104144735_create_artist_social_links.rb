@@ -9,6 +9,6 @@ class CreateArtistSocialLinks < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    add_index :artist_social_links, [:artist_id, :position]
+    add_index :artist_social_links, [ :artist_id, :position ]
   end
 end

@@ -7,6 +7,6 @@ class CreateEventDiscounts < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    add_index :event_discounts, [:event_id, :discount_id], unique: true
+    add_index :event_discounts, [ :event_id, :discount_id ], unique: true
   end
 end

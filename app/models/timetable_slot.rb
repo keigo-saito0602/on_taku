@@ -1,7 +1,7 @@
 class TimetableSlot < ApplicationRecord
   SLOT_INCREMENT_MINUTES = 5
-  PERFORMANCE_TEMPLATES = [20, 30, 45, 60, 90].freeze
-  CHANGEOVER_TEMPLATES = [5, 10, 15].freeze
+  PERFORMANCE_TEMPLATES = [ 20, 30, 45, 60, 90 ].freeze
+  CHANGEOVER_TEMPLATES = [ 5, 10, 15 ].freeze
   SLOT_KINDS = %w[performance changeover other].freeze
 
   belongs_to :event
@@ -94,5 +94,4 @@ class TimetableSlot < ApplicationRecord
     self.slot_kind = artist_id.present? ? "performance" : "other" if slot_kind.blank?
     self.changeover = (slot_kind == "changeover")
   end
-
 end

@@ -63,7 +63,7 @@ ActiveRecord::Base.transaction do
     discount.description = "事前取置で200円引き"
   end
 
-  event.update!(discount_ids: [early.id, student.id, reservation.id])
+  event.update!(discount_ids: [ early.id, student.id, reservation.id ])
 
   timetable = event.event_timetables.find_or_create_by!(stage_name: "Main Stage") do |t|
     t.position = 0
