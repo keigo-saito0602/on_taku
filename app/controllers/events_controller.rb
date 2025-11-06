@@ -156,7 +156,8 @@ class EventsController < ApplicationController
   end
 
   def load_show_context
-    @event_timetables = @event.event_timetables.includes(timetable_slots: :artist).ordered
+    @event_timetables =
+      @event.event_timetables.includes(timetable_slots: { artist: %i[social_links members] }).ordered
     @timetable_slots = @event_timetables.flat_map(&:timetable_slots)
     @available_discounts = Discount.ordered
     @discounted_price = @event.discounted_price

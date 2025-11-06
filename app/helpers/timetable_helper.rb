@@ -26,4 +26,18 @@ module TimetableHelper
       [ "出演", "bg-emerald-100 text-emerald-700 border-emerald-200" ]
     end
   end
+
+  def artist_modal_payload(artist)
+    return "{}" if artist.blank?
+
+    {
+      name: artist.name,
+      genre: artist.genre.presence,
+      kind: artist.kind_i18n,
+      description: artist.description.presence,
+      official_link: artist.official_link.presence,
+      social_links: artist.social_links.map { |link| { label: link.label, url: link.url } },
+      members: artist.members.map { |member| { name: member.name, instrument: member.instrument, role: member.role } }
+    }.to_json
+  end
 end

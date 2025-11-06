@@ -17,12 +17,9 @@
   <% scale = 3.2 %>
   <% chart_height = total_minutes * scale %>
 
-  <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+  <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm" data-controller="artist-modal">
     <div class="flex items-center justify-between pb-4">
       <h3 class="text-base font-semibold text-slate-800"><%= timetable.stage_name %></h3>
-      <% if defined?(show_edit) && show_edit %>
-        <%= link_to "タイムテーブルを編集", edit_timetable_event_path(@event), class: "text-xs font-semibold text-sky-600 hover:text-sky-500" %>
-      <% end %>
     </div>
     <div class="relative">
       <div class="absolute left-0 top-0 w-16" style="height: <%= chart_height %>px;">
@@ -49,7 +46,21 @@
                 <span class="font-mono text-slate-500"><%= slot.start_time.strftime("%H:%M") %> - <%= slot.end_time.strftime("%H:%M") %></span>
               </span>
               <% if slot.artist %>
-                <span class="text-slate-600"><%= slot.artist.name %></span>
+                <%= link_to slot.artist.name,
+                            "#",
+                            class: "text-sky-600 hover:text-sky-500",
+                            data: {
+                              action: "artist-modal#open",
+                              artist_modal_payload_value: {
+                                name: slot.artist.name,
+                                genre: slot.artist.genre.presence,
+                                kind: slot.artist.kind_i18n,
+                                description: slot.artist.description.presence,
+                                official_link: slot.artist.official_link.presence,
+                                social_links: slot.artist.social_links.map { |link| { label: link.label, url: link.url } },
+                                members: slot.artist.members.map { |member| { name: member.name, instrument: member.instrument, role: member.role } }
+                              }.to_json
+                            } %>
               <% end %>
             </div>
             <% if slot.note.present? %>
@@ -62,5 +73,14 @@
         <% end %>
       </div>
     </div>
+    <dialog class="w-full max-w-lg rounded-2xl border border-slate-300 bg-white p-0 shadow-2xl" data-artist-modal-target="dialog">
+      <form method="dialog" class="flex flex-col gap-4 p-6 text-sm text-slate-700">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg font-semibold text-slate-900" data-artist-modal-target="title"></h3>
+          <button type="submit" class="text-xs font-semibold text-slate-400 hover:text-slate-600">閉じる</button>
+        </div>
+        <div class="space-y-3 text-sm" data-artist-modal-target="body"></div>
+      </form>
+    </dialog>
   </div>
 <% end %>
