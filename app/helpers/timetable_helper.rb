@@ -8,12 +8,19 @@ module TimetableHelper
   def timeline_window(slots, padding: 30)
     return [ 17 * 60, 22 * 60 ] if slots.blank?
 
-    start_minutes = slots.map { |slot| minutes_since_midnight(slot.start_time) }.compact.min || 0
-    end_minutes = slots.map { |slot| minutes_since_midnight(slot.end_time) }.compact.max || 0
-    [
-      [ start_minutes - padding, 0 ].max,
-      [ [ end_minutes + padding, start_minutes + 60 ].max, 24 * 60 ].min
-    ]
+    starts = slots.map { |slot| minutes_since_midnight(slot.start_time) }.compact
+    ends = slots.map { |slot| minutes_since_midnight(slot.end_time) }.compact
+
+    start_minutes = starts.min || 0
+    end_minutes = [ ends.max || start_minutes, start_minutes + 30 ].max
+
+    window_start = ((start_minutes - padding) / 60).floor * 60
+    window_end = ((end_minutes + padding) / 60.0).ceil * 60
+
+    window_start = [ window_start, 0 ].max
+    window_end = [ [ window_end, window_start + 60 ].max, 24 * 60 ].min
+
+    [ window_start, window_end ]
   end
 
   def slot_label_and_color(slot)
