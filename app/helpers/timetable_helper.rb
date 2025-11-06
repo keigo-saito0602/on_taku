@@ -44,13 +44,14 @@ module TimetableHelper
       description: artist.try(:description).presence,
       official_link: artist.official_link.presence,
       social_links: artist.social_links.map { |link| { label: link.label, url: link.url } },
-      members: artist.members.map { |member| { name: member.name, instrument: member.instrument, role: member.role } }
+      members: artist.members.map { |member| { name: member.name, instrument: member.instrument, role: member.role } },
+      edit_path: edit_artist_path(artist)
     }.to_json
   end
 
   def timetable_note_payload(slot)
     {
-      name: "#{slot.start_time.strftime('%H:%M')}枠の備考",
+      title: "#{slot.start_time.strftime('%H:%M')}枠の備考",
       note: slot.note
     }.to_json
   end

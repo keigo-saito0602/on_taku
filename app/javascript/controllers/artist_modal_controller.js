@@ -1,7 +1,10 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["dialog", "title", "body"]
+  static targets = ["backdrop", "container", "panel", "title", "body", "editButton"]
+  static values = {
+    bodyClass: { type: String, default: "" }
+  }
 
   open(event) {
     event.preventDefault()
@@ -15,17 +18,27 @@ export default class extends Controller {
       return
     }
 
+    this.previousFocus = document.activeElement
+
     if (this.hasTitleTarget) {
-      this.titleTarget.textContent = payload.name || "アーティスト"
+      this.titleTarget.textContent = payload.title || payload.name || "詳細"
     }
 
     if (this.hasBodyTarget) {
       this.bodyTarget.innerHTML = this.composeBody(payload)
     }
 
-    if (this.hasDialogTarget) {
-      this.dialogTarget.showModal()
+    if (this.hasEditButtonTarget) {
+      if (payload.edit_path) {
+        this.editButtonTarget.classList.remove("hidden")
+        this.editButtonTarget.href = payload.edit_path
+      } else {
+        this.editButtonTarget.classList.add("hidden")
+        this.editButtonTarget.removeAttribute("href")
+      }
     }
+
+    this.show()
   }
 
   composeBody(payload) {
@@ -89,5 +102,43 @@ export default class extends Controller {
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#39;")
+  }
+
+  show() {
+    if (this.hasBackdropTarget) this.backdropTarget.classList.remove("hidden")
+    if (this.hasContainerTarget) this.containerTarget.classList.remove("hidden")
+    if (this.bodyClassValue) document.body.classList.add(this.bodyClassValue)
+    document.addEventListener("keydown", this.handleKeydown)
+    this.focusFirstElement()
+  }
+
+  close(event) {
+    if (event) event.preventDefault()
+    if (this.hasBackdropTarget) this.backdropTarget.classList.add("hidden")
+    if (this.hasContainerTarget) this.containerTarget.classList.add("hidden")
+    if (this.bodyClassValue) document.body.classList.remove(this.bodyClassValue)
+    document.removeEventListener("keydown", this.handleKeydown)
+    if (this.previousFocus && typeof this.previousFocus.focus === "function") {
+      this.previousFocus.focus()
+    }
+  }
+
+  handleKeydown = (event) => {
+    if (event.key === "Escape") {
+      event.preventDefault()
+      this.close()
+    }
+  }
+
+  focusFirstElement() {
+    if (!this.hasPanelTarget) return
+    const focusable = this.panelTarget.querySelector(
+      'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])'
+    )
+    if (focusable && typeof focusable.focus === "function") {
+      focusable.focus()
+    } else if (this.hasPanelTarget && typeof this.panelTarget.focus === "function") {
+      this.panelTarget.focus()
+    }
   }
 }
