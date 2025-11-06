@@ -494,11 +494,8 @@ export default class extends Controller {
     if (start === null || end === null || end <= start) return
 
     const padding = paddingOverride !== null ? paddingOverride : Number(slot.closest("[data-timetable-editor-target='canvas']")?.dataset.padding || this.paddingValue)
-    const gap = 12
-    const positionInput = slot.querySelector("input[data-timetable-editor-target='position']")
-    const orderIndex = positionInput ? Number(positionInput.value) - 1 : 0
-    const top = padding + (start - origin) * this.scaleValue + orderIndex * gap
-    const height = Math.max((end - start) * this.scaleValue - gap, 72)
+    const top = padding + (start - origin) * this.scaleValue
+    const height = Math.max((end - start) * this.scaleValue, 28)
 
     slot.style.position = "absolute"
     slot.style.top = `${top}px`

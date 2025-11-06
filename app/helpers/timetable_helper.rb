@@ -47,4 +47,11 @@ module TimetableHelper
       members: artist.members.map { |member| { name: member.name, instrument: member.instrument, role: member.role } }
     }.to_json
   end
+
+  def timetable_note_payload(slot)
+    {
+      name: "#{slot.start_time.strftime('%H:%M')}枠の備考",
+      note: slot.note
+    }.to_json
+  end
 end
