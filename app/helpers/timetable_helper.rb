@@ -34,7 +34,7 @@ module TimetableHelper
       name: artist.name,
       genre: artist.genre.presence,
       kind: artist.kind_i18n,
-      description: artist.description.presence,
+      description: artist.try(:description).presence,
       official_link: artist.official_link.presence,
       social_links: artist.social_links.map { |link| { label: link.label, url: link.url } },
       members: artist.members.map { |member| { name: member.name, instrument: member.instrument, role: member.role } }

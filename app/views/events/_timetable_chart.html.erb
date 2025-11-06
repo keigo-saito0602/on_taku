@@ -55,7 +55,7 @@
                                 name: slot.artist.name,
                                 genre: slot.artist.genre.presence,
                                 kind: slot.artist.kind_i18n,
-                                description: slot.artist.description.presence,
+                                description: slot.artist.try(:description).presence,
                                 official_link: slot.artist.official_link.presence,
                                 social_links: slot.artist.social_links.map { |link| { label: link.label, url: link.url } },
                                 members: slot.artist.members.map { |member| { name: member.name, instrument: member.instrument, role: member.role } }
