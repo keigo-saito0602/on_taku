@@ -79,6 +79,12 @@ module TimetableHelper
       total += (b - a) * scale
     end
 
+    unless intervals.empty?
+      first_offset = intervals.first[:offset]
+      intervals.each { |interval| interval[:offset] -= first_offset }
+      total -= first_offset
+    end
+
     {
       intervals: intervals,
       height: [ total, 60 * slot_scale ].max
