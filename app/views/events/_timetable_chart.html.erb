@@ -13,8 +13,8 @@
   </div>
 <% else %>
   <% window_start, window_end = timeline_window(slots) %>
-  <% layout = timeline_layout(slots, window_start:, window_end:) %>
-  <% chart_height = layout[:height] %>
+  <% slot_scale = 3.6 %>
+  <% chart_height = (window_end - window_start) * slot_scale %>
 
   <% modal_dom_id = dom_id(timetable, :artist_modal) %>
   <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm" data-controller="artist-modal" data-artist-modal-body-class="overflow-hidden">
@@ -24,7 +24,7 @@
     <div class="relative">
       <div class="absolute left-0 top-0 w-16" style="height: <%= chart_height %>px;">
         <% (window_start..window_end).step(30) do |minute| %>
-          <% y = timeline_offset_for(minute, layout) %>
+          <% y = timeline_offset_for(minute, scale: slot_scale, window_start:) %>
           <% primary = (minute % 60).zero? %>
           <div class="absolute left-0 right-0 <%= primary ? "border-t border-dashed border-slate-200 text-[11px] text-slate-400" : "border-t border-dotted border-slate-100 text-[9px] text-slate-300" %>" style="top: <%= y %>px;">
             <% if primary %>
@@ -37,8 +37,8 @@
         <% slots.each do |slot| %>
           <% start_minutes = minutes_since_midnight(slot.start_time) %>
           <% end_minutes = minutes_since_midnight(slot.end_time) %>
-          <% top = timeline_offset_for(start_minutes, layout) %>
-          <% bottom = timeline_offset_for(end_minutes, layout) %>
+          <% top = timeline_offset_for(start_minutes, scale: slot_scale, window_start:) %>
+          <% bottom = timeline_offset_for(end_minutes, scale: slot_scale, window_start:) %>
           <% height = [bottom - top, 56].max %>
           <% label, color = slot_label_and_color(slot) %>
           <div class="absolute left-4 right-4 flex flex-col gap-2 overflow-hidden rounded-xl border bg-white px-4 py-3 text-sm shadow-sm transition hover:shadow"

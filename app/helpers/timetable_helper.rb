@@ -14,8 +14,11 @@ module TimetableHelper
     start_minutes = starts.min || 0
     end_minutes = [ ends.max || start_minutes, start_minutes + 30 ].max
 
-    window_start = ((start_minutes - padding) / 60).floor * 60
-    window_end = ((end_minutes + padding) / 60.0).ceil * 60
+    window_start = (start_minutes - padding).floor
+    window_end = (end_minutes + padding).ceil
+
+    window_start = (window_start / 15).floor * 15
+    window_end = (window_end / 15.0).ceil * 15
 
     window_start = [ window_start, 0 ].max
     window_end = [ [ window_end, window_start + 60 ].max, 24 * 60 ].min
@@ -56,51 +59,7 @@ module TimetableHelper
     }.to_json
   end
 
-  def timeline_layout(slots, window_start:, window_end:, slot_scale: 4.0, gap_scale: 1.4)
-    points = [ window_start, window_end ]
-    slots.each do |slot|
-      points << minutes_since_midnight(slot.start_time)
-      points << minutes_since_midnight(slot.end_time)
-    end
-    points = points.compact.uniq.sort
-
-    intervals = []
-    total = 0.0
-
-    points.each_cons(2) do |a, b|
-      next if b <= a
-      active = slots.any? do |slot|
-        slot_start = minutes_since_midnight(slot.start_time)
-        slot_end = minutes_since_midnight(slot.end_time)
-        slot_start < b && slot_end > a
-      end
-      scale = active ? slot_scale : gap_scale
-      intervals << { start: a, finish: b, scale:, offset: total }
-      total += (b - a) * scale
-    end
-
-    unless intervals.empty?
-      first_offset = intervals.first[:offset]
-      intervals.each { |interval| interval[:offset] -= first_offset }
-      total -= first_offset
-    end
-
-    {
-      intervals: intervals,
-      height: [ total, 60 * slot_scale ].max
-    }
-  end
-
-  def timeline_offset_for(minute, layout)
-    return 0 unless layout[:intervals].present?
-
-    interval = layout[:intervals].find { |segment| minute >= segment[:start] && minute <= segment[:finish] }
-    if interval
-      interval[:offset] + (minute - interval[:start]) * interval[:scale]
-    elsif minute < layout[:intervals].first[:start]
-      0
-    else
-      layout[:height]
-    end
+  def timeline_offset_for(minute, scale:, window_start:)
+    (minute - window_start) * scale
   end
 end
