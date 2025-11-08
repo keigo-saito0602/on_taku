@@ -13,8 +13,10 @@
   </div>
 <% else %>
   <% window_start, window_end = timeline_window(slots) %>
-  <% slot_scale = 3.6 %>
-  <% chart_height = (window_end - window_start) * slot_scale %>
+  <% step_minutes = 5 %>
+  <% layout = grid_layout_for_slots(slots, window_start:, window_end:, step_minutes:) %>
+  <% row_count = layout[:row_count] %>
+  <% col_count = layout[:column_count] %>
 
   <% modal_dom_id = dom_id(timetable, :artist_modal) %>
   <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm" data-controller="artist-modal" data-artist-modal-body-class="overflow-hidden">
@@ -22,27 +24,27 @@
       <h3 class="text-base font-semibold text-slate-800"><%= timetable.stage_name %></h3>
     </div>
     <div class="relative">
-      <div class="absolute left-0 top-0 w-16" style="height: <%= chart_height %>px;">
-        <% (window_start..window_end).step(30) do |minute| %>
-          <% y = timeline_offset_for(minute, scale: slot_scale, window_start:) %>
-          <% primary = (minute % 60).zero? %>
-          <div class="absolute left-0 right-0 <%= primary ? "border-t border-dashed border-slate-200 text-[11px] text-slate-400" : "border-t border-dotted border-slate-100 text-[9px] text-slate-300" %>" style="top: <%= y %>px;">
-            <% if primary %>
-              <span class="pl-1 align-top"><%= format("%02d:00", minute / 60) %></span>
-            <% end %>
-          </div>
+      <div class="grid overflow-hidden rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs text-slate-500"
+           style="
+             grid-template-columns: minmax(2.5rem, 4rem) repeat(<%= col_count %>, minmax(0,1fr));
+             grid-template-rows: repeat(<%= row_count %>, minmax(12px, auto));
+             gap: 0.5rem 0.5rem;
+           ">
+        <% row_count.times do |row_index| %>
+          <% minute = window_start + row_index * step_minutes %>
+          <% if (minute % 60).zero? %>
+            <div class="select-none text-[11px] text-slate-400"
+                 style="grid-column: 1 / span 1; grid-row: <%= row_index + 1 %>;">
+              <%= format("%02d:%02d", minute / 60, minute % 60) %>
+            </div>
+          <% end %>
         <% end %>
-      </div>
-      <div class="relative ml-16 overflow-hidden rounded-xl border border-slate-200 bg-slate-50" style="height: <%= chart_height %>px;">
-        <% slots.each do |slot| %>
-          <% start_minutes = minutes_since_midnight(slot.start_time) %>
-          <% end_minutes = minutes_since_midnight(slot.end_time) %>
-          <% top = timeline_offset_for(start_minutes, scale: slot_scale, window_start:) %>
-          <% bottom = timeline_offset_for(end_minutes, scale: slot_scale, window_start:) %>
-          <% height = [bottom - top, 56].max %>
+
+        <% layout[:items].each do |item| %>
+          <% slot = item[:slot] %>
           <% label, color = slot_label_and_color(slot) %>
-          <div class="absolute left-4 right-4 flex flex-col gap-2 overflow-hidden rounded-xl border bg-white px-4 py-3 text-sm shadow-sm transition hover:shadow"
-               style="top: <%= top %>px; height: <%= height %>px;">
+          <article class="flex flex-col gap-2 overflow-hidden rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm shadow-sm"
+                   style="grid-column: <%= item[:column] + 2 %> / <%= item[:column] + 3 %>; grid-row: <%= item[:row_start] %> / <%= item[:row_end] %>;">
             <div class="flex flex-wrap items-start justify-between gap-2 text-xs font-semibold">
               <span class="inline-flex flex-wrap items-center gap-2 whitespace-nowrap">
                 <span class="rounded-full px-2 py-0.5 text-[11px] font-semibold <%= color %>"><%= label %></span>
@@ -75,7 +77,7 @@
             <% if !slot.changeover? && slot.artist.blank? %>
               <p class="text-xs font-semibold text-rose-600">出演者未定</p>
             <% end %>
-          </div>
+          </article>
         <% end %>
       </div>
     </div>

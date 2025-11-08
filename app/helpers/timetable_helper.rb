@@ -59,7 +59,40 @@ module TimetableHelper
     }.to_json
   end
 
-  def timeline_offset_for(minute, scale:, window_start:)
-    (minute - window_start) * scale
+  def grid_layout_for_slots(slots, window_start:, window_end:, step_minutes: 5)
+    total_rows = ((window_end - window_start).to_f / step_minutes).ceil + 1
+    items = []
+    return { items:, column_count: 1, row_count: total_rows, step_minutes: } if slots.blank?
+
+    sorted = slots.sort_by(&:start_time)
+    column_endings = []
+
+    sorted.each do |slot|
+      slot_start = minutes_since_midnight(slot.start_time)
+      slot_end = minutes_since_midnight(slot.end_time)
+      column_index = column_endings.index { |ending| ending <= slot.start_time }
+      if column_index.nil?
+        column_index = column_endings.length
+        column_endings << slot.end_time
+      else
+        column_endings[column_index] = slot.end_time
+      end
+      row_start = grid_row_index(slot_start, window_start, step_minutes)
+      row_end = [ grid_row_index(slot_end, window_start, step_minutes), row_start + 1 ].max
+      row_end = [ row_end, total_rows ].min
+      items << { slot:, column: column_index, row_start:, row_end: }
+    end
+
+    {
+      items:,
+      column_count: [ column_endings.length, 1 ].max,
+      row_count: total_rows,
+      step_minutes:
+    }
+  end
+
+  def grid_row_index(minute_value, base_minute, step)
+    offset = [ minute_value - base_minute, 0 ].max
+    (offset / step).floor + 1
   end
 end
