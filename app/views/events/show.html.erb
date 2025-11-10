@@ -159,7 +159,7 @@
   </section>
 </div>
 
-<section class="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+<section id="timetable" class="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
   <% timetables = @event_timetables || [] %>
   <% unassigned = timetables.any? { |t| t.timetable_slots.any? { |slot| !slot.changeover? && slot.artist.nil? } } %>
   <div class="flex flex-wrap items-center justify-between gap-3">
@@ -176,58 +176,7 @@
   <% if timetables.present? %>
     <div class="mt-4 space-y-6">
       <% timetables.each do |timetable| %>
-        <div class="overflow-hidden rounded-xl border border-slate-200">
-          <div class="flex items-center justify-between bg-slate-50 px-4 py-3">
-            <div class="text-sm font-semibold text-slate-700">ステージ: <%= timetable.stage_name %></div>
-            <% if can_manage_event %>
-              <span class="text-xs text-slate-400">順序 <%= timetable.position.to_i + 1 %></span>
-            <% end %>
-          </div>
-          <table class="min-w-full divide-y divide-slate-200 text-sm">
-            <thead class="bg-white text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
-              <tr>
-                <th class="px-4 py-3">開始</th>
-                <th class="px-4 py-3">終了</th>
-                <th class="px-4 py-3">枠種別</th>
-                <th class="px-4 py-3">出演者</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100">
-              <% timetable.timetable_slots.each do |slot| %>
-                <tr class="hover:bg-slate-50">
-                  <td class="px-4 py-3 font-mono text-slate-700"><%= slot.start_time.strftime("%H:%M") %></td>
-                  <td class="px-4 py-3 font-mono text-slate-700"><%= slot.end_time.strftime("%H:%M") %></td>
-                  <td class="px-4 py-3">
-                    <% label, label_class =
-                         case slot.slot_kind
-                         when "changeover"
-                           ["転換", "bg-amber-100 text-amber-700"]
-                         when "other"
-                           ["その他", "bg-slate-200 text-slate-600"]
-                         else
-                           ["出演", "bg-emerald-100 text-emerald-700"]
-                         end %>
-                    <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold <%= label_class %>"><%= label %></span>
-                  </td>
-                  <td class="px-4 py-3 text-slate-600">
-                    <% if slot.artist %>
-                      <%= link_to slot.artist.name, slot.artist, class: "text-sky-600 hover:text-sky-500" %>
-                    <% else %>
-                      <span class="<%= slot.changeover? ? "text-slate-400" : "text-rose-500 font-semibold" %>">
-                        <%= slot.changeover? ? "-" : "出演者未定" %>
-                      </span>
-                    <% end %>
-                  </td>
-                </tr>
-              <% end %>
-              <% if timetable.timetable_slots.blank? %>
-                <tr>
-                  <td colspan="4" class="px-4 py-6 text-center text-sm text-slate-500">枠が登録されていません</td>
-                </tr>
-              <% end %>
-            </tbody>
-          </table>
-        </div>
+        <%= render "events/timetable_chart", timetable:, show_edit: can_manage_event %>
       <% end %>
     </div>
   <% else %>

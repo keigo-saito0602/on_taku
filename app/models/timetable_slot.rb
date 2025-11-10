@@ -10,6 +10,7 @@ class TimetableSlot < ApplicationRecord
 
   validates :start_time, :end_time, presence: true
   validates :slot_kind, inclusion: { in: SLOT_KINDS }
+  validates :note, length: { maximum: 1_000 }
   validate :end_after_start
   validate :time_on_grid
   validate :slot_in_increment

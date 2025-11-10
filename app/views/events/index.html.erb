@@ -25,7 +25,8 @@
         <tr class="hover:bg-slate-50">
           <td class="px-4 py-3 text-slate-700"><%= l event.event_date %></td>
           <td class="px-4 py-3">
-            <%= link_to event.name, event, class: "font-semibold text-sky-600 hover:text-sky-500" %>
+            <% destination = event.timetable_slots.exists? ? event_path(event, anchor: "timetable") : event_path(event) %>
+            <%= link_to event.name, destination, class: "font-semibold text-sky-600 hover:text-sky-500" %>
           </td>
           <td class="px-4 py-3 text-slate-600"><%= event.venue %></td>
           <td class="px-4 py-3 text-slate-600">

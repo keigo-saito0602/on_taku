@@ -22,4 +22,20 @@
   .stage-hidden {
     @apply hidden;
   }
+  .timetable-canvas {
+    @apply min-h-[420px];
+  }
+  .timetable-slot-card {
+    @apply pointer-events-auto rounded-xl border shadow-sm transition;
+  }
+  .timetable-slot-card .slot-card-body {
+    @apply text-sm;
+  }
+  .timetable-slot-card .timetable-time-input {
+    @apply text-base;
+  }
+  .timetable-hour-guide::before {
+    content: "";
+    @apply absolute inset-y-0 right-0 border-r border-slate-200;
+  }
 }

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_11_05_090000) do
+ActiveRecord::Schema[8.1].define(version: 2025_11_05_134500) do
   create_table "artist_members", force: :cascade do |t|
     t.integer "artist_id", null: false
     t.datetime "created_at", null: false
@@ -118,6 +118,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_05_090000) do
     t.time "end_time", null: false
     t.integer "event_id", null: false
     t.integer "event_timetable_id", null: false
+    t.text "note", default: "", null: false
     t.integer "position"
     t.string "slot_kind", default: "performance", null: false
     t.string "stage_name"
