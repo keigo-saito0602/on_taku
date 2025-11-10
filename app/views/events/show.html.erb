@@ -185,24 +185,3 @@
     </div>
   <% end %>
 </section>
-
-<section class="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-  <div class="flex items-center justify-between">
-    <h2 class="text-lg font-semibold text-slate-800">評価メモ</h2>
-    <% if current_user&.organizer? && @event.organizer_id == current_user.id %>
-      <%= link_to "CSVをインポート", new_event_evaluation_memo_path(@event), class: "text-sm font-semibold text-sky-600 hover:text-sky-500" %>
-    <% end %>
-  </div>
-  <div class="mt-4 space-y-3 text-sm">
-    <% if @event.evaluation_memos.present? %>
-      <% @event.evaluation_memos.each do |memo| %>
-        <article class="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
-          <h3 class="text-xs font-semibold uppercase tracking-wide text-slate-500"><%= memo.category %></h3>
-          <div class="mt-1 whitespace-pre-wrap text-slate-700"><%= memo.note %></div>
-        </article>
-      <% end %>
-    <% else %>
-      <p class="rounded-lg bg-slate-50 px-4 py-3 text-slate-500">インポート済みのメモはありません。</p>
-    <% end %>
-  </div>
-</section>

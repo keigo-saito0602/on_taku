@@ -20,6 +20,5 @@ Rails.application.routes.draw do
     end
 
     resources :timetable_slots, except: :index
-    resources :evaluation_memos, only: %i[index new create]
   end
 end
