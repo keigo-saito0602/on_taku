@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_11_05_134500) do
+ActiveRecord::Schema[8.1].define(version: 2025_11_10_111908) do
   create_table "artist_members", force: :cascade do |t|
     t.integer "artist_id", null: false
     t.datetime "created_at", null: false
@@ -55,18 +55,6 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_05_134500) do
     t.integer "value", default: 0, null: false
     t.index ["name"], name: "index_discounts_on_name", unique: true
     t.index ["priority"], name: "index_discounts_on_priority"
-  end
-
-  create_table "evaluation_memos", force: :cascade do |t|
-    t.string "category", null: false
-    t.datetime "created_at", null: false
-    t.json "data", default: {}, null: false
-    t.integer "event_id"
-    t.text "note", null: false
-    t.integer "source_row"
-    t.datetime "updated_at", null: false
-    t.index ["category"], name: "index_evaluation_memos_on_category"
-    t.index ["event_id"], name: "index_evaluation_memos_on_event_id"
   end
 
   create_table "event_discounts", force: :cascade do |t|
@@ -144,7 +132,6 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_05_134500) do
 
   add_foreign_key "artist_members", "artists"
   add_foreign_key "artist_social_links", "artists"
-  add_foreign_key "evaluation_memos", "events"
   add_foreign_key "event_discounts", "discounts"
   add_foreign_key "event_discounts", "events"
   add_foreign_key "event_timetables", "events"

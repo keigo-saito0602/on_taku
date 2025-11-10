@@ -5,7 +5,6 @@ class Event < ApplicationRecord
   has_many :event_timetables, -> { order(:position, :id) }, dependent: :destroy, inverse_of: :event
   has_many :timetable_slots, through: :event_timetables
   has_many :artists, through: :timetable_slots
-  has_many :evaluation_memos, dependent: :nullify
   has_many :event_discounts, dependent: :destroy
   has_many :discounts, through: :event_discounts
 
