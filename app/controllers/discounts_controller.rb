@@ -20,6 +20,8 @@ class DiscountsController < ApplicationController
     end
   end
 
+  def show; end
+
   def edit; end
 
   def update
@@ -42,11 +44,26 @@ class DiscountsController < ApplicationController
   end
 
   def discount_params
-    params.require(:discount).permit(:name, :kind, :value, :description, :priority)
+    params.require(:discount).permit(
+      :name,
+      :kind,
+      :value,
+      :description,
+      :priority,
+      :category,
+      :scope,
+      :stacking_rule,
+      :published,
+      :start_at,
+      :end_at,
+      :minimum_amount,
+      :minimum_quantity,
+      :usage_limit_per_user,
+      :usage_limit_total
+    )
   end
 
   def next_priority
     Discount.maximum(:priority).to_i + 1
   end
 end
-  def show; end

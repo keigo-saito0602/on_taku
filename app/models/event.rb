@@ -24,7 +24,38 @@ class Event < ApplicationRecord
   scope :upcoming, -> { where("event_date >= ?", Date.current).order(:event_date) }
 
   def discounted_price
-    discounts.ordered.reduce(entrance_fee) { |price, discount| discount.apply_to(price) }
+    discount_breakdown.total_after
+  end
+
+  def discount_breakdown(context: {})
+    @discount_breakdown = nil if context.present?
+    @discount_breakdown ||= Discounts::Calculator.new(event: self, context: context).result
+  end
+
+  def record_discount_snapshot!(context: {})
+    breakdown = discount_breakdown(context:)
+    DiscountSnapshot.create!(
+      event: self,
+      applied_discounts: breakdown.applied_discounts.map { |entry| entry.slice(:id, :name, :scope, :category, :kind, :amount_before, :amount_after, :savings) },
+      total_before: breakdown.total_before,
+      total_after: breakdown.total_after,
+      ticket_before: breakdown.ticket_before,
+      ticket_after: breakdown.ticket_after,
+      drink_before: breakdown.drink_before,
+      drink_after: breakdown.drink_after,
+      merch_before: breakdown.merch_before,
+      merch_after: breakdown.merch_after,
+      rounding_mode: breakdown.rounding_mode,
+      details: breakdown.as_json
+    )
+  end
+
+  def ticket_subtotal
+    event_fee.to_i
+  end
+
+  def drink_subtotal
+    drink_fee.to_i
   end
 
   def state_i18n

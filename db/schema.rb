@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_11_10_111908) do
+ActiveRecord::Schema[8.1].define(version: 2025_11_11_104839) do
   create_table "artist_members", force: :cascade do |t|
     t.integer "artist_id", null: false
     t.datetime "created_at", null: false
@@ -45,16 +45,51 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_10_111908) do
     t.index ["name"], name: "index_artists_on_name", unique: true
   end
 
+  create_table "discount_snapshots", force: :cascade do |t|
+    t.json "applied_discounts", default: [], null: false
+    t.datetime "created_at", null: false
+    t.json "details", default: {}, null: false
+    t.integer "drink_after", default: 0, null: false
+    t.integer "drink_before", default: 0, null: false
+    t.integer "event_id", null: false
+    t.integer "merch_after", default: 0, null: false
+    t.integer "merch_before", default: 0, null: false
+    t.string "rounding_mode", default: "floor", null: false
+    t.integer "ticket_after", default: 0, null: false
+    t.integer "ticket_before", default: 0, null: false
+    t.integer "total_after", default: 0, null: false
+    t.integer "total_before", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.index ["event_id", "created_at"], name: "index_discount_snapshots_on_event_id_and_created_at"
+    t.index ["event_id"], name: "index_discount_snapshots_on_event_id"
+  end
+
   create_table "discounts", force: :cascade do |t|
+    t.string "category", default: "custom", null: false
     t.datetime "created_at", null: false
     t.text "description"
+    t.datetime "end_at"
     t.string "kind", null: false
+    t.integer "minimum_amount", default: 0, null: false
+    t.integer "minimum_quantity", default: 0, null: false
     t.string "name", null: false
     t.integer "priority", default: 0, null: false
+    t.boolean "published", default: true, null: false
+    t.string "scope", default: "total", null: false
+    t.string "stacking_rule", default: "stackable", null: false
+    t.datetime "start_at"
     t.datetime "updated_at", null: false
+    t.integer "usage_limit_per_user", default: 0, null: false
+    t.integer "usage_limit_total", default: 0, null: false
     t.integer "value", default: 0, null: false
+    t.index ["category"], name: "index_discounts_on_category"
+    t.index ["end_at"], name: "index_discounts_on_end_at"
     t.index ["name"], name: "index_discounts_on_name", unique: true
     t.index ["priority"], name: "index_discounts_on_priority"
+    t.index ["published"], name: "index_discounts_on_published"
+    t.index ["scope"], name: "index_discounts_on_scope"
+    t.index ["stacking_rule"], name: "index_discounts_on_stacking_rule"
+    t.index ["start_at"], name: "index_discounts_on_start_at"
   end
 
   create_table "event_discounts", force: :cascade do |t|
@@ -132,6 +167,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_10_111908) do
 
   add_foreign_key "artist_members", "artists"
   add_foreign_key "artist_social_links", "artists"
+  add_foreign_key "discount_snapshots", "events"
   add_foreign_key "event_discounts", "discounts"
   add_foreign_key "event_discounts", "events"
   add_foreign_key "event_timetables", "events"

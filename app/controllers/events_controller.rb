@@ -77,6 +77,7 @@ class EventsController < ApplicationController
   def apply_discounts
     discount_ids = extract_discount_ids
     if @event.update(discount_ids:)
+      @event.record_discount_snapshot!(context: { reference_time: Time.current })
       redirect_to @event, success: "割引を更新しました"
     else
       load_show_context
@@ -160,7 +161,8 @@ class EventsController < ApplicationController
       @event.event_timetables.includes(timetable_slots: { artist: %i[social_links members] }).ordered
     @timetable_slots = @event_timetables.flat_map(&:timetable_slots)
     @available_discounts = Discount.ordered
-    @discounted_price = @event.discounted_price
+    @discount_breakdown = @event.discount_breakdown
+    @discounted_price = @discount_breakdown.total_after
   end
 
   def extract_discount_ids
