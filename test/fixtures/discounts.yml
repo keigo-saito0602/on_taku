@@ -1,15 +1,31 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
-  name: MyString
-  kind: MyString
-  value: 1
-  description: MyText
-  priority: 1
+  name: 早割10
+  kind: percentage
+  value: 10
+  description: 早期購入で10%オフ
+  priority: 2
+  category: early
+  scope: ticket
+  stacking_rule: stackable
+  published: true
+  minimum_amount: 0
+  minimum_quantity: 0
+  usage_limit_per_user: 0
+  usage_limit_total: 0
 
 two:
-  name: MyString
-  kind: MyString
-  value: 1
-  description: MyText
-  priority: 1
+  name: セット割500
+  kind: fixed
+  value: 500
+  description: チケット+ドリンクで500円引き
+  priority: 0
+  category: set
+  scope: total
+  stacking_rule: stackable
+  published: true
+  minimum_amount: 0
+  minimum_quantity: 0
+  usage_limit_per_user: 0
+  usage_limit_total: 0

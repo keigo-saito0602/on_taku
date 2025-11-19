@@ -17,22 +17,67 @@
     <h2 class="text-lg font-semibold text-slate-800">基本情報</h2>
     <dl class="mt-4 space-y-3 text-sm">
       <div class="flex items-baseline justify-between">
-        <dt class="text-slate-500">種別</dt>
-        <dd class="font-medium text-slate-800"><%= @discount.kind_percentage? ? "割合（%）" : "固定額（円）" %></dd>
+        <dt class="text-slate-500">カテゴリ</dt>
+        <dd class="font-medium text-slate-800"><%= @discount.category_label %></dd>
+      </div>
+      <div class="flex items-baseline justify-between">
+        <dt class="text-slate-500">適用範囲</dt>
+        <dd class="font-medium text-slate-800"><%= @discount.scope_label %></dd>
+      </div>
+      <div class="flex items-baseline justify-between">
+        <dt class="text-slate-500">割引方式</dt>
+        <dd class="font-medium text-slate-800">
+          <% if @discount.kind_percentage? %>
+            割合（%）
+          <% elsif @discount.kind_fixed? %>
+            固定額（円）
+          <% else %>
+            特典 / その他
+          <% end %>
+        </dd>
       </div>
       <div class="flex items-baseline justify-between">
         <dt class="text-slate-500">割引値</dt>
         <dd class="font-medium text-slate-800">
           <% if @discount.kind_percentage? %>
             <%= @discount.value %>%
-          <% else %>
+          <% elsif @discount.kind_fixed? %>
             ¥<%= number_with_delimiter(@discount.value) %>
+          <% else %>
+            -
           <% end %>
         </dd>
       </div>
       <div class="flex items-baseline justify-between">
         <dt class="text-slate-500">適用順</dt>
         <dd class="font-medium text-slate-800"><%= @discount.priority %></dd>
+      </div>
+      <div class="flex items-baseline justify-between">
+        <dt class="text-slate-500">併用ルール</dt>
+        <dd>
+          <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600"><%= @discount.stacking_label %></span>
+        </dd>
+      </div>
+      <div class="flex items-baseline justify-between">
+        <dt class="text-slate-500">公開状態</dt>
+        <% status = @discount.status %>
+        <% tone =
+             case status
+             when :active then "bg-emerald-100 text-emerald-700"
+             when :upcoming then "bg-amber-100 text-amber-700"
+             when :expired then "bg-rose-100 text-rose-700"
+             else "bg-slate-200 text-slate-600"
+             end %>
+        <dd>
+          <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold <%= tone %>"><%= @discount.status_label %></span>
+        </dd>
+      </div>
+      <div>
+        <dt class="text-slate-500">適用期間</dt>
+        <dd class="mt-1 text-slate-600">
+          <%= @discount.start_at&.strftime("%Y/%m/%d %H:%M") || "設定なし" %> 〜
+          <%= @discount.end_at&.strftime("%Y/%m/%d %H:%M") || "設定なし" %>
+        </dd>
       </div>
       <div>
         <dt class="text-slate-500">説明</dt>
@@ -56,3 +101,25 @@
     <% end %>
   </section>
 </div>
+
+<section class="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+  <h2 class="text-lg font-semibold text-slate-800">適用条件</h2>
+  <div class="mt-4 grid gap-4 md:grid-cols-2">
+    <div>
+      <div class="text-xs font-semibold uppercase tracking-wide text-slate-500">最低対象金額</div>
+      <div class="mt-1 text-sm font-medium text-slate-800"><%= @discount.minimum_amount.positive? ? "¥#{number_with_delimiter(@discount.minimum_amount)}" : "指定なし" %></div>
+    </div>
+    <div>
+      <div class="text-xs font-semibold uppercase tracking-wide text-slate-500">最低数量</div>
+      <div class="mt-1 text-sm font-medium text-slate-800"><%= @discount.minimum_quantity.positive? ? "#{@discount.minimum_quantity} 件" : "指定なし" %></div>
+    </div>
+    <div>
+      <div class="text-xs font-semibold uppercase tracking-wide text-slate-500">ユーザー上限</div>
+      <div class="mt-1 text-sm font-medium text-slate-800"><%= @discount.usage_limit_per_user.positive? ? "#{@discount.usage_limit_per_user} 回" : "無制限" %></div>
+    </div>
+    <div>
+      <div class="text-xs font-semibold uppercase tracking-wide text-slate-500">イベント全体上限</div>
+      <div class="mt-1 text-sm font-medium text-slate-800"><%= @discount.usage_limit_total.positive? ? "#{@discount.usage_limit_total} 回" : "無制限" %></div>
+    </div>
+  </div>
+</section>

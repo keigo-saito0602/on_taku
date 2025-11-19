@@ -17,9 +17,35 @@
 
   <div class="grid gap-4 md:grid-cols-2">
     <div>
+      <%= f.label :category, "割引カテゴリ", class: "block text-sm font-semibold text-slate-700" %>
+      <%= f.select :category,
+            Discount.categories.keys.map { |key| [Discount.category_label_for(key), key] },
+            {},
+            class: "mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200" %>
+    </div>
+    <div>
+      <%= f.label :scope, "適用範囲", class: "block text-sm font-semibold text-slate-700" %>
+      <%= f.select :scope,
+            Discount.scopes.keys.map { |key| [Discount.scope_label_for(key), key] },
+            {},
+            class: "mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200" %>
+    </div>
+  </div>
+
+  <div class="grid gap-4 md:grid-cols-2">
+    <div>
       <%= f.label :kind, "割引種別", class: "block text-sm font-semibold text-slate-700" %>
       <%= f.select :kind,
-            Discount.kinds.keys.map { |k| [k == "percentage" ? "割合 (%)" : "固定額 (円)", k] },
+            Discount.kinds.keys.map { |k|
+              label =
+                case k
+                when "percentage" then "割合 (%)"
+                when "fixed" then "固定額 (円)"
+                when "perk" then "特典"
+                else "その他"
+                end
+              [label, k]
+            },
             {},
             class: "mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200" %>
     </div>
@@ -30,11 +56,60 @@
     </div>
   </div>
 
-  <div>
-    <%= f.label :priority, "適用順序", class: "block text-sm font-semibold text-slate-700" %>
-    <%= f.number_field :priority, min: 0, class: "mt-1 w-32 rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200" %>
-    <p class="mt-1 text-xs text-slate-500">値が小さいものから順に適用されます。</p>
+  <div class="grid gap-4 md:grid-cols-3">
+    <div>
+      <%= f.label :stacking_rule, "併用ルール", class: "block text-sm font-semibold text-slate-700" %>
+      <%= f.select :stacking_rule,
+            Discount.stacking_rules.keys.map { |key| [Discount.stacking_label_for(key), key] },
+            {},
+            class: "mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200" %>
+    </div>
+    <div>
+      <%= f.label :priority, "適用順序", class: "block text-sm font-semibold text-slate-700" %>
+      <%= f.number_field :priority, min: 0, class: "mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200" %>
+      <p class="mt-1 text-xs text-slate-500">値が小さいものから順に適用されます。</p>
+    </div>
+    <div class="flex items-end gap-2">
+      <%= f.check_box :published, class: "rounded border-slate-300 text-sky-600 focus:ring-sky-500" %>
+      <%= f.label :published, "公開する", class: "text-sm font-semibold text-slate-700" %>
+    </div>
   </div>
+
+  <div class="grid gap-4 md:grid-cols-2">
+    <div>
+      <%= f.label :start_at, "開始日時", class: "block text-sm font-semibold text-slate-700" %>
+      <%= f.datetime_field :start_at, class: "mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200" %>
+    </div>
+    <div>
+      <%= f.label :end_at, "終了日時", class: "block text-sm font-semibold text-slate-700" %>
+      <%= f.datetime_field :end_at, class: "mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200" %>
+    </div>
+  </div>
+
+  <fieldset class="rounded-xl border border-slate-200 bg-white p-4">
+    <legend class="px-2 text-xs font-semibold uppercase tracking-wide text-slate-500">適用条件</legend>
+    <div class="mt-4 grid gap-4 md:grid-cols-2">
+      <div>
+        <%= f.label :minimum_amount, "最低対象金額 (円)", class: "block text-sm font-semibold text-slate-700" %>
+        <%= f.number_field :minimum_amount, min: 0, class: "mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200" %>
+      </div>
+      <div>
+        <%= f.label :minimum_quantity, "最低数量", class: "block text-sm font-semibold text-slate-700" %>
+        <%= f.number_field :minimum_quantity, min: 0, class: "mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200" %>
+      </div>
+    </div>
+    <div class="mt-4 grid gap-4 md:grid-cols-2">
+      <div>
+        <%= f.label :usage_limit_per_user, "ユーザー単位の利用上限", class: "block text-sm font-semibold text-slate-700" %>
+        <%= f.number_field :usage_limit_per_user, min: 0, class: "mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200" %>
+        <p class="mt-1 text-xs text-slate-500">0で無制限。</p>
+      </div>
+      <div>
+        <%= f.label :usage_limit_total, "イベント全体の利用上限", class: "block text-sm font-semibold text-slate-700" %>
+        <%= f.number_field :usage_limit_total, min: 0, class: "mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200" %>
+      </div>
+    </div>
+  </fieldset>
 
   <div>
     <%= f.label :description, "説明", class: "block text-sm font-semibold text-slate-700" %>
