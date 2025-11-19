@@ -186,7 +186,7 @@
                      data-discount-selection-target="row"
                      data-discount-id="<%= discount.id %>"
                      data-discount-name="<%= discount.name %>"
-                     data-discount-details="<%= [effect_label, detail_text, \"状態: #{discount.status_label}\"].join(' / ') %>">
+                     data-discount-details="<%= [effect_label, detail_text, "状態: #{discount.status_label}"].join(' / ') %>">
                 <%= check_box_tag "discount_assignment[ids][]",
                       discount.id,
                       @event.discount_ids.include?(discount.id),
